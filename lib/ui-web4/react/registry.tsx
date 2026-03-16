@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import type { CatalogDef } from '../core/types';
+import type { CatalogDefinition } from '../core/index';
 
 export type ComponentRenderer<P = Record<string, unknown>> = (params: {
   props: P;
@@ -12,7 +12,7 @@ export type ComponentRenderer<P = Record<string, unknown>> = (params: {
 export type Registry = Record<string, ComponentRenderer>;
 
 export function defineRegistry(
-  _catalog: CatalogDef,
+  _catalog: CatalogDefinition,
   def: { components: Record<string, ComponentRenderer> },
 ): { registry: Registry } {
   return { registry: def.components };

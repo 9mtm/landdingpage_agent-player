@@ -1167,17 +1167,19 @@ export const { registry } = defineRegistry(chatCatalog, {
     },
 
     ToggleGroup: ({ props }) => {
-      const [value, setValue] = useState(props.value ?? '');
+      const label = props.label as React.ReactNode;
+      const options = (props.options as Array<{ value: string; label: React.ReactNode }>) ?? [];
+      const [value, setValue] = useState((props.value as string) ?? '');
       return (
         <div className="flex flex-col gap-1.5">
-          {props.label && <span className="text-sm font-medium">{props.label}</span>}
+          {label && <span className="text-sm font-medium">{label}</span>}
           <ToggleGroupUI
             type="single"
             value={value}
             onValueChange={v => v && setValue(v)}
             variant={(props.variant ?? 'outline') as any}
           >
-            {(props.options ?? []).map(opt => (
+            {options.map(opt => (
               <ToggleGroupItem key={opt.value} value={opt.value}>{opt.label}</ToggleGroupItem>
             ))}
           </ToggleGroupUI>
@@ -1186,11 +1188,12 @@ export const { registry } = defineRegistry(chatCatalog, {
     },
 
     CollapsibleSection: ({ props, children }) => {
-      const [open, setOpen] = useState(props.defaultOpen ?? false);
+      const title = props.title as React.ReactNode;
+      const [open, setOpen] = useState((props.defaultOpen as boolean) ?? false);
       return (
         <Collapsible open={open} onOpenChange={setOpen}>
           <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border px-4 py-3 text-sm font-medium hover:bg-muted/50 transition-colors">
-            {props.title}
+            {title}
             <ChevronDown className={cn('h-4 w-4 transition-transform', open && 'rotate-180')} />
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2 rounded-lg border border-border px-4 py-3">
@@ -1206,41 +1209,50 @@ export const { registry } = defineRegistry(chatCatalog, {
       </ScrollArea>
     ),
 
-    TooltipText: ({ props }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className={cn('underline decoration-dotted cursor-help', props.muted && 'text-muted-foreground')}>
-              {props.text}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="text-xs">{props.tooltip}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
+    TooltipText: ({ props }) => {
+      const text = props.text as React.ReactNode;
+      const tooltip = props.tooltip as React.ReactNode;
+      const muted = props.muted as boolean;
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className={cn('underline decoration-dotted cursor-help', muted && 'text-muted-foreground')}>
+                {text}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">{tooltip}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
 
-    Breadcrumb: ({ props }) => (
-      <BreadcrumbUI>
-        <BreadcrumbList>
-          {(props.items ?? []).map((item, i) => (
-            <React.Fragment key={i}>
-              <BreadcrumbItemUI>
-                {item.href
-                  ? <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
-                  : <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                }
-              </BreadcrumbItemUI>
-              {i < props.items.length - 1 && <BreadcrumbSeparator />}
-            </React.Fragment>
-          ))}
-        </BreadcrumbList>
-      </BreadcrumbUI>
-    ),
+    Breadcrumb: ({ props }) => {
+      const items = (props.items as Array<{ label: React.ReactNode; href?: string }>) ?? [];
+      return (
+        <BreadcrumbUI>
+          <BreadcrumbList>
+            {items.map((item, i) => (
+              <React.Fragment key={i}>
+                <BreadcrumbItemUI>
+                  {item.href
+                    ? <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                    : <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                  }
+                </BreadcrumbItemUI>
+                {i < items.length - 1 && <BreadcrumbSeparator />}
+              </React.Fragment>
+            ))}
+          </BreadcrumbList>
+        </BreadcrumbUI>
+      );
+    },
 
     PaginationBar: ({ props }) => {
-      const { currentPage, totalPages } = props;
+      const currentPage = (props.currentPage as number) ?? 1;
+      const totalPages = (props.totalPages as number) ?? 1;
       const pages = Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
         if (totalPages <= 5) return i + 1;
         if (currentPage <= 3) return i + 1;
@@ -1285,45 +1297,54 @@ export const { registry } = defineRegistry(chatCatalog, {
       );
     },
 
-    Carousel: ({ props }) => (
-      <CarouselUI className="w-full">
-        <CarouselContent>
-          {(props.items ?? []).map((item, i) => (
-            <CarouselItemUI key={i}>
-              <div className="rounded-xl border border-border bg-card p-6 flex flex-col gap-2 min-h-[120px] items-center justify-center text-center">
-                {item.imageUrl && (
-                  <img src={item.imageUrl} alt={item.title ?? ''} className="h-24 w-full object-cover rounded-md mb-2" />
-                )}
-                {item.title && <p className="font-semibold text-sm">{item.title}</p>}
-                {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
-              </div>
-            </CarouselItemUI>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </CarouselUI>
-    ),
+    Carousel: ({ props }) => {
+      const items = (props.items as Array<{ title?: React.ReactNode; description?: React.ReactNode; imageUrl?: string }>) ?? [];
+      return (
+        <CarouselUI className="w-full">
+          <CarouselContent>
+            {items.map((item, i) => (
+              <CarouselItemUI key={i}>
+                <div className="rounded-xl border border-border bg-card p-6 flex flex-col gap-2 min-h-[120px] items-center justify-center text-center">
+                  {item.imageUrl && (
+                    <img src={item.imageUrl} alt={(item.title as string) ?? ''} className="h-24 w-full object-cover rounded-md mb-2" />
+                  )}
+                  {item.title && <p className="font-semibold text-sm">{item.title}</p>}
+                  {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
+                </div>
+              </CarouselItemUI>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </CarouselUI>
+      );
+    },
 
-    HoverCard: ({ props }) => (
-      <HoverCard>
-        <HoverCardTrigger asChild>
-          <span className="underline decoration-dotted cursor-pointer text-primary hover:text-primary/80 transition-colors">
-            {props.triggerText}
-          </span>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-64">
-          {props.title && <p className="font-semibold text-sm mb-1">{props.title}</p>}
-          <p className="text-xs text-muted-foreground">{props.description}</p>
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    HoverCard: ({ props }) => {
+      const triggerText = props.triggerText as React.ReactNode;
+      const title = props.title as React.ReactNode;
+      const description = props.description as React.ReactNode;
+      return (
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <span className="underline decoration-dotted cursor-pointer text-primary hover:text-primary/80 transition-colors">
+              {triggerText}
+            </span>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-64">
+            {title && <p className="font-semibold text-sm mb-1">{title}</p>}
+            <p className="text-xs text-muted-foreground">{description}</p>
+          </HoverCardContent>
+        </HoverCard>
+      );
+    },
 
     OTPDisplay: ({ props }) => {
-      const len = props.length ?? 6;
+      const label = props.label as React.ReactNode;
+      const len = (props.length as number) ?? 6;
       return (
         <div className="flex flex-col gap-2">
-          {props.label && <Label className="text-sm font-medium">{props.label}</Label>}
+          {label && <Label className="text-sm font-medium">{label}</Label>}
           <InputOTP maxLength={len}>
             <InputOTPGroup>
               {Array.from({ length: len }).map((_, i) => (
@@ -1335,167 +1356,203 @@ export const { registry } = defineRegistry(chatCatalog, {
       );
     },
 
-    SidePanel: ({ props, children }) => (
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className={cn(
-          'flex items-center gap-3 px-4 py-3 border-b border-border bg-muted/30',
-          props.side === 'bottom' || props.side === 'top' ? 'flex-col items-start' : 'flex-row'
-        )}>
-          <div className="flex flex-col gap-0.5">
-            <span className="font-semibold text-sm">{props.title}</span>
-            {props.description && <span className="text-xs text-muted-foreground">{props.description}</span>}
+    SidePanel: ({ props, children }) => {
+      const title = props.title as React.ReactNode;
+      const description = props.description as React.ReactNode;
+      return (
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className={cn(
+            'flex items-center gap-3 px-4 py-3 border-b border-border bg-muted/30',
+            props.side === 'bottom' || props.side === 'top' ? 'flex-col items-start' : 'flex-row'
+          )}>
+            <div className="flex flex-col gap-0.5">
+              <span className="font-semibold text-sm">{title}</span>
+              {description && <span className="text-xs text-muted-foreground">{description}</span>}
+            </div>
           </div>
+          <div className="p-4">{children}</div>
         </div>
-        <div className="p-4">{children}</div>
-      </div>
-    ),
+      );
+    },
 
-    DrawerCard: ({ props, children }) => (
-      <div className="rounded-t-2xl border border-border bg-card overflow-hidden shadow-lg">
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1.5 w-10 rounded-full bg-muted-foreground/30" />
+    DrawerCard: ({ props, children }) => {
+      const title = props.title as React.ReactNode;
+      const description = props.description as React.ReactNode;
+      return (
+        <div className="rounded-t-2xl border border-border bg-card overflow-hidden shadow-lg">
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="h-1.5 w-10 rounded-full bg-muted-foreground/30" />
+          </div>
+          <div className="px-4 pb-2">
+            <h3 className="font-semibold text-base">{title}</h3>
+            {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+          </div>
+          <div className="px-4 pb-4">{children}</div>
         </div>
-        <div className="px-4 pb-2">
-          <h3 className="font-semibold text-base">{props.title}</h3>
-          {props.description && <p className="text-xs text-muted-foreground mt-0.5">{props.description}</p>}
-        </div>
-        <div className="px-4 pb-4">{children}</div>
-      </div>
-    ),
+      );
+    },
 
     AlertDialogCard: ({ props }) => {
+      const title = props.title as React.ReactNode;
+      const description = props.description as React.ReactNode;
+      const cancelLabel = (props.cancelLabel as React.ReactNode) ?? 'Cancel';
+      const confirmLabel = (props.confirmLabel as React.ReactNode) ?? 'Confirm';
       const isDestructive = props.variant === 'destructive';
       return (
         <div className="rounded-xl border border-border bg-card p-5 space-y-4 shadow-sm">
           <div className="space-y-2">
-            <h3 className="font-semibold text-base">{props.title}</h3>
-            <p className="text-sm text-muted-foreground">{props.description}</p>
+            <h3 className="font-semibold text-base">{title}</h3>
+            <p className="text-sm text-muted-foreground">{description}</p>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm">{props.cancelLabel ?? 'Cancel'}</Button>
+            <Button variant="outline" size="sm">{cancelLabel}</Button>
             <Button variant={isDestructive ? 'destructive' : 'default'} size="sm">
-              {props.confirmLabel ?? 'Confirm'}
+              {confirmLabel}
             </Button>
           </div>
         </div>
       );
     },
 
-    DialogCard: ({ props, children }) => (
-      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div>
-            <h3 className="font-semibold text-base">{props.title}</h3>
-            {props.description && <p className="text-xs text-muted-foreground mt-0.5">{props.description}</p>}
+    DialogCard: ({ props, children }) => {
+      const title = props.title as React.ReactNode;
+      const description = props.description as React.ReactNode;
+      return (
+        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <div>
+              <h3 className="font-semibold text-base">{title}</h3>
+              {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+            </div>
+            <span className="text-muted-foreground text-lg leading-none cursor-pointer hover:text-foreground transition-colors">✕</span>
           </div>
-          <span className="text-muted-foreground text-lg leading-none cursor-pointer hover:text-foreground transition-colors">✕</span>
+          <div className="px-5 py-4">{children}</div>
         </div>
-        <div className="px-5 py-4">{children}</div>
-      </div>
-    ),
+      );
+    },
 
-    DropdownList: ({ props }) => (
-      <div className="rounded-xl border border-border bg-popover shadow-sm overflow-hidden min-w-[200px]">
-        {props.label && (
-          <div className="px-3 py-2 border-b border-border">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{props.label}</span>
-          </div>
-        )}
-        <div className="py-1">
-          {(props.items ?? []).map((item, i) => (
-            <React.Fragment key={i}>
-              {item.separator && <div className="my-1 h-px bg-border mx-2" />}
-              <div className={cn(
-                'flex items-center justify-between px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors',
-                item.disabled && 'opacity-40 pointer-events-none'
-              )}>
-                <span>{item.label}</span>
-                {item.shortcut && (
-                  <span className="ml-auto text-xs text-muted-foreground tracking-widest">{item.shortcut}</span>
-                )}
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-    ),
-
-    CommandSearch: ({ props }) => (
-      <div className="rounded-xl border border-border bg-popover shadow-sm overflow-hidden">
-        <div className="flex items-center border-b border-border px-3 py-2 gap-2">
-          <span className="text-muted-foreground text-sm">⌘</span>
-          <input
-            readOnly
-            placeholder={props.placeholder ?? 'Type a command...'}
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          />
-        </div>
-        <div className="py-1 max-h-60 overflow-auto">
-          {(props.groups ?? []).map((group, gi) => (
-            <div key={gi}>
-              {gi > 0 && <div className="my-1 h-px bg-border mx-2" />}
-              {group.heading && (
-                <div className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  {group.heading}
-                </div>
-              )}
-              {(group.items ?? []).map((item, ii) => (
-                <div key={ii} className="flex items-center justify-between px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors cursor-pointer rounded-md mx-1">
+    DropdownList: ({ props }) => {
+      const label = props.label as React.ReactNode;
+      const items = (props.items as Array<{ label: React.ReactNode; shortcut?: string; separator?: boolean; disabled?: boolean }>) ?? [];
+      return (
+        <div className="rounded-xl border border-border bg-popover shadow-sm overflow-hidden min-w-[200px]">
+          {label && (
+            <div className="px-3 py-2 border-b border-border">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</span>
+            </div>
+          )}
+          <div className="py-1">
+            {items.map((item, i) => (
+              <React.Fragment key={i}>
+                {item.separator && <div className="my-1 h-px bg-border mx-2" />}
+                <div className={cn(
+                  'flex items-center justify-between px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors',
+                  item.disabled && 'opacity-40 pointer-events-none'
+                )}>
                   <span>{item.label}</span>
                   {item.shortcut && (
-                    <span className="ml-auto text-xs text-muted-foreground tracking-widest bg-muted px-1.5 py-0.5 rounded">
-                      {item.shortcut}
-                    </span>
+                    <span className="ml-auto text-xs text-muted-foreground tracking-widest">{item.shortcut}</span>
                   )}
                 </div>
-              ))}
-            </div>
-          ))}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
+
+    CommandSearch: ({ props }) => {
+      const placeholder = (props.placeholder as string) ?? 'Type a command...';
+      const groups = (props.groups as Array<{ heading?: React.ReactNode; items?: Array<{ label: React.ReactNode; shortcut?: string }> }>) ?? [];
+      return (
+        <div className="rounded-xl border border-border bg-popover shadow-sm overflow-hidden">
+          <div className="flex items-center border-b border-border px-3 py-2 gap-2">
+            <span className="text-muted-foreground text-sm">⌘</span>
+            <input
+              readOnly
+              placeholder={placeholder}
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            />
+          </div>
+          <div className="py-1 max-h-60 overflow-auto">
+            {groups.map((group, gi) => (
+              <div key={gi}>
+                {gi > 0 && <div className="my-1 h-px bg-border mx-2" />}
+                {group.heading && (
+                  <div className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    {group.heading}
+                  </div>
+                )}
+                {(group.items ?? []).map((item, ii) => (
+                  <div key={ii} className="flex items-center justify-between px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors cursor-pointer rounded-md mx-1">
+                    <span>{item.label}</span>
+                    {item.shortcut && (
+                      <span className="ml-auto text-xs text-muted-foreground tracking-widest bg-muted px-1.5 py-0.5 rounded">
+                        {item.shortcut}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    },
 
     ResizablePanel: ({ props, children }) => {
-      const direction = props.direction ?? 'horizontal';
-      const split = props.defaultSplit ?? 50;
+      const direction = (props.direction as 'horizontal' | 'vertical') ?? 'horizontal';
+      const split = (props.defaultSplit as number) ?? 50;
+      const leftLabel = props.leftLabel as React.ReactNode;
+      const rightLabel = props.rightLabel as React.ReactNode;
+      const PanelGroup = ResizablePanelGroup as any;
       return (
-        <ResizablePanelGroup direction={direction} className="rounded-xl border border-border overflow-hidden min-h-[160px]">
+        <PanelGroup direction={direction} className="rounded-xl border border-border overflow-hidden min-h-[160px]">
           <ResizablePanelUI defaultSize={split} className="flex flex-col">
-            {props.leftLabel && (
+            {leftLabel && (
               <div className="px-3 py-2 border-b border-border bg-muted/30 text-xs font-medium text-muted-foreground">
-                {props.leftLabel}
+                {leftLabel}
               </div>
             )}
             <div className="flex-1 p-3">{children}</div>
           </ResizablePanelUI>
           <ResizableHandle withHandle />
           <ResizablePanelUI defaultSize={100 - split} className="flex flex-col">
-            {props.rightLabel && (
+            {rightLabel && (
               <div className="px-3 py-2 border-b border-border bg-muted/30 text-xs font-medium text-muted-foreground">
-                {props.rightLabel}
+                {rightLabel}
               </div>
             )}
             <div className="flex-1 p-3 text-xs text-muted-foreground">Drag the handle to resize panels.</div>
           </ResizablePanelUI>
-        </ResizablePanelGroup>
+        </PanelGroup>
       );
     },
 
-    AspectBox: ({ props, children }) => (
-      <div className="w-full">
-        {props.label && <p className="text-xs text-muted-foreground mb-1">{props.label}</p>}
-        <AspectRatio ratio={props.ratio ?? 16 / 9} className={cn('rounded-xl border border-border overflow-hidden', props.bg ?? 'bg-muted/30')}>
-          {children ?? (
-            <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-              {props.ratio === 1 ? '1:1' : props.ratio && props.ratio > 1.7 ? '16:9' : props.ratio && props.ratio > 1.3 ? '4:3' : 'Content Area'}
-            </div>
-          )}
-        </AspectRatio>
-      </div>
-    ),
+    AspectBox: ({ props, children }) => {
+      const label = props.label as React.ReactNode;
+      const ratio = (props.ratio as number) ?? 16 / 9;
+      const bg = (props.bg as string) ?? 'bg-muted/30';
+      return (
+        <div className="w-full">
+          {label && <p className="text-xs text-muted-foreground mb-1">{label}</p>}
+          <AspectRatio ratio={ratio} className={cn('rounded-xl border border-border overflow-hidden', bg)}>
+            {children ?? (
+              <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                {ratio === 1 ? '1:1' : ratio > 1.7 ? '16:9' : ratio > 1.3 ? '4:3' : 'Content Area'}
+              </div>
+            )}
+          </AspectRatio>
+        </div>
+      );
+    },
 
     // ── File Formats ──────────────────────────────────────────────────────────
     JsonViewer: ({ props }) => {
+      const title = props.title as React.ReactNode;
+      const maxHeight = props.maxHeight as number | undefined;
+      const defaultExpanded = props.defaultExpanded as boolean | undefined;
+
       function renderJson(value: unknown, depth: number, path: string): React.ReactNode {
         if (value === null) return <span className="text-muted-foreground italic">null</span>;
         if (typeof value === 'boolean') return <span className="text-amber-500">{String(value)}</span>;
@@ -1505,7 +1562,7 @@ export const { registry } = defineRegistry(chatCatalog, {
         if (Array.isArray(value)) {
           if (value.length === 0) return <span className="text-muted-foreground">[]</span>;
           return (
-            <CollapsibleJsonNode label={`[ ${value.length} items ]`} depth={depth} path={path} defaultOpen={props.defaultExpanded !== false}>
+            <CollapsibleJsonNode label={`[ ${value.length} items ]`} depth={depth} path={path} defaultOpen={defaultExpanded !== false}>
               {value.map((item, i) => (
                 <div key={i} className="flex gap-1">
                   <span className="text-muted-foreground shrink-0">{i}:</span>
@@ -1521,7 +1578,7 @@ export const { registry } = defineRegistry(chatCatalog, {
           const keys = Object.keys(value as object);
           if (keys.length === 0) return <span className="text-muted-foreground">{'{}'}</span>;
           return (
-            <CollapsibleJsonNode label={`{ ${keys.length} keys }`} depth={depth} path={path} defaultOpen={props.defaultExpanded !== false || depth === 0}>
+            <CollapsibleJsonNode label={`{ ${keys.length} keys }`} depth={depth} path={path} defaultOpen={defaultExpanded !== false || depth === 0}>
               {keys.map((key, i) => (
                 <div key={key} className="flex gap-1 flex-wrap">
                   <span className="text-foreground font-medium shrink-0">"{key}":</span>
@@ -1538,14 +1595,14 @@ export const { registry } = defineRegistry(chatCatalog, {
 
       return (
         <div className="rounded-xl border border-border bg-muted/20 overflow-hidden">
-          {props.title && (
+          {title && (
             <div className="px-4 py-2 border-b border-border bg-muted/30 text-xs font-medium text-muted-foreground">
-              {props.title}
+              {title}
             </div>
           )}
           <div
             className="p-4 font-mono text-xs overflow-auto"
-            style={{ maxHeight: props.maxHeight ? `${props.maxHeight}px` : undefined }}
+            style={{ maxHeight: maxHeight ? `${maxHeight}px` : undefined }}
           >
             {renderJson(props.data, 0, 'root')}
           </div>
@@ -1553,41 +1610,48 @@ export const { registry } = defineRegistry(chatCatalog, {
       );
     },
 
-    MarkdownBlock: ({ props }) => (
-      <div className={cn(
-        'text-sm leading-relaxed',
-        '[&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-3 [&_h1]:mt-4',
-        '[&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-4',
-        '[&_h3]:text-base [&_h3]:font-semibold [&_h3]:mb-1.5 [&_h3]:mt-3',
-        '[&_h4]:text-sm [&_h4]:font-medium [&_h4]:mb-1 [&_h4]:mt-2',
-        '[&_p]:mb-3 [&_p]:text-foreground',
-        '[&_strong]:font-semibold',
-        '[&_em]:italic',
-        '[&_ul]:mb-3 [&_ul]:pl-4 [&_ul]:list-disc [&_ul]:space-y-1',
-        '[&_ol]:mb-3 [&_ol]:pl-4 [&_ol]:list-decimal [&_ol]:space-y-1',
-        '[&_li]:text-foreground',
-        '[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4',
-        '[&_blockquote]:border-l-4 [&_blockquote]:border-primary/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_blockquote]:my-3',
-        '[&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono',
-        '[&_pre]:bg-muted [&_pre]:rounded-lg [&_pre]:p-4 [&_pre]:overflow-auto [&_pre]:my-3 [&_pre]:text-xs',
-        '[&_pre_code]:bg-transparent [&_pre_code]:p-0',
-        '[&_hr]:border-border [&_hr]:my-4',
-        '[&_table]:w-full [&_table]:text-xs [&_table]:border-collapse',
-        '[&_th]:bg-muted [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-medium [&_th]:border [&_th]:border-border',
-        '[&_td]:px-3 [&_td]:py-2 [&_td]:border [&_td]:border-border',
-      )}>
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeSanitize]}
-          disallowedElements={['script', 'style', 'iframe', 'object', 'embed', 'link']}
-          urlTransform={sanitizeMarkdownUri}
-        >
-          {props.content}
-        </ReactMarkdown>
-      </div>
-    ),
+    MarkdownBlock: ({ props }) => {
+      const content = (props.content as string) ?? '';
+      return (
+        <div className={cn(
+          'text-sm leading-relaxed',
+          '[&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-3 [&_h1]:mt-4',
+          '[&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-4',
+          '[&_h3]:text-base [&_h3]:font-semibold [&_h3]:mb-1.5 [&_h3]:mt-3',
+          '[&_h4]:text-sm [&_h4]:font-medium [&_h4]:mb-1 [&_h4]:mt-2',
+          '[&_p]:mb-3 [&_p]:text-foreground',
+          '[&_strong]:font-semibold',
+          '[&_em]:italic',
+          '[&_ul]:mb-3 [&_ul]:pl-4 [&_ul]:list-disc [&_ul]:space-y-1',
+          '[&_ol]:mb-3 [&_ol]:pl-4 [&_ol]:list-decimal [&_ol]:space-y-1',
+          '[&_li]:text-foreground',
+          '[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4',
+          '[&_blockquote]:border-l-4 [&_blockquote]:border-primary/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_blockquote]:my-3',
+          '[&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono',
+          '[&_pre]:bg-muted [&_pre]:rounded-lg [&_pre]:p-4 [&_pre]:overflow-auto [&_pre]:my-3 [&_pre]:text-xs',
+          '[&_pre_code]:bg-transparent [&_pre_code]:p-0',
+          '[&_hr]:border-border [&_hr]:my-4',
+          '[&_table]:w-full [&_table]:text-xs [&_table]:border-collapse',
+          '[&_th]:bg-muted [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-medium [&_th]:border [&_th]:border-border',
+          '[&_td]:px-3 [&_td]:py-2 [&_td]:border [&_td]:border-border',
+        )}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeSanitize]}
+            disallowedElements={['script', 'style', 'iframe', 'object', 'embed', 'link']}
+            urlTransform={sanitizeMarkdownUri}
+          >
+            {content}
+          </ReactMarkdown>
+        </div>
+      );
+    },
 
     AvatarCard: ({ props }) => {
+      const size = (props.size as string) ?? 'md';
+      const title = props.title as React.ReactNode;
+      const removable = props.removable as boolean;
+
       const { user } = useAuth();
       const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
       const [bgColor, setBgColor] = useState<string | null>(null);
@@ -1618,7 +1682,7 @@ export const { registry } = defineRegistry(chatCatalog, {
         md: { w: 260, h: 390 },
         lg: { w: 320, h: 480 },
       };
-      const { w, h } = sizeDims[props.size ?? 'md'] ?? sizeDims.md;
+      const { w, h } = sizeDims[size] ?? sizeDims.md;
 
       if (!visible) return null;
 
@@ -1628,10 +1692,10 @@ export const { registry } = defineRegistry(chatCatalog, {
 
       return (
         <div className="relative inline-flex flex-col items-center rounded-xl overflow-hidden border border-border bg-black shadow-md" style={{ width: w, height: h }}>
-          {props.title && (
-            <div className="absolute top-2 left-3 z-10 text-xs font-medium text-white/70">{props.title}</div>
+          {title && (
+            <div className="absolute top-2 left-3 z-10 text-xs font-medium text-white/70">{title}</div>
           )}
-          {props.removable && (
+          {removable && (
             <button
               onClick={() => setVisible(false)}
               className="absolute top-2 right-2 z-10 rounded-full bg-black/50 p-1 text-white/70 hover:text-white hover:bg-black/80 transition-colors"
@@ -1658,27 +1722,45 @@ export const { registry } = defineRegistry(chatCatalog, {
       );
     },
 
-    SupportChatBlock: ({ props }) => (
-      <SupportChatBlockDynamic
-        agentName={props.agentName ?? 'Assistant'}
-        height={props.height ?? 500}
-        removable={props.removable ?? false}
-        bgColor={props.bgColor ?? null}
-      />
-    ),
+    SupportChatBlock: ({ props }) => {
+      const agentName = (props.agentName as string) ?? 'Assistant';
+      const height = (props.height as number) ?? 500;
+      const removable = (props.removable as boolean) ?? false;
+      const bgColor = (props.bgColor as string) ?? null;
+      return (
+        <SupportChatBlockDynamic
+          agentName={agentName}
+          height={height}
+          removable={removable}
+          bgColor={bgColor}
+        />
+      );
+    },
 
-    AgentSupportPortal: ({ props }) => (
-      <AgentSupportPortalDynamic
-        height={props.height ?? 560}
-        bgColor={props.bgColor ?? null}
-        title={props.title ?? 'Choose your assistant'}
-      />
-    ),
+    AgentSupportPortal: ({ props }) => {
+      const height = (props.height as number) ?? 560;
+      const bgColor = (props.bgColor as string) ?? null;
+      const title = (props.title as string) ?? 'Choose your assistant';
+      return (
+        <AgentSupportPortalDynamic
+          height={height}
+          bgColor={bgColor}
+          title={title}
+        />
+      );
+    },
 
     WeatherCard: ({ props }) => {
       type Condition = 'sunny' | 'partly-cloudy' | 'cloudy' | 'rainy' | 'snowy' | 'stormy' | 'windy';
-      const size = props.size ?? 'md';
-      const unit = props.unit ?? 'C';
+      const size = (props.size as string) ?? 'md';
+      const unit = (props.unit as string) ?? 'C';
+      const condition = props.condition as Condition;
+      const temperature = props.temperature as React.ReactNode;
+      const location = props.location as React.ReactNode;
+      const feelsLike = props.feelsLike as React.ReactNode | null | undefined;
+      const humidity = props.humidity as React.ReactNode | null | undefined;
+      const wind = props.wind as React.ReactNode | null | undefined;
+      const forecast = props.forecast as Array<{ day: string; condition: string; high: React.ReactNode; low: React.ReactNode }> | undefined;
 
       const COND: Record<Condition, { label: string; bg: string; iconColor: string; IconComp: React.ElementType }> = {
         sunny:           { label: 'Sunny',         bg: 'from-amber-400/20 to-orange-300/10',  iconColor: 'text-amber-500',  IconComp: Sun },
@@ -1690,17 +1772,18 @@ export const { registry } = defineRegistry(chatCatalog, {
         windy:           { label: 'Windy',          bg: 'from-teal-400/20 to-cyan-300/10',    iconColor: 'text-teal-500',   IconComp: Wind },
       };
 
-      const cfg = COND[props.condition as Condition] ?? COND.cloudy;
+      const cfg = COND[condition] ?? COND.cloudy;
+      const IconComponent = cfg.IconComp as any;
       const tempClass = size === 'sm' ? 'text-2xl' : size === 'lg' ? 'text-5xl' : 'text-4xl';
 
       if (size === 'sm') {
         return (
           <div className={cn('rounded-xl border bg-gradient-to-br p-4 flex items-center gap-3', cfg.bg)}>
-            <cfg.IconComp className={cn('shrink-0 h-8 w-8', cfg.iconColor)} />
+            <IconComponent className={cn('shrink-0 h-8 w-8', cfg.iconColor)} />
             <div>
-              <div className={cn('font-bold leading-none', tempClass)}>{props.temperature}°{unit}</div>
+              <div className={cn('font-bold leading-none', tempClass)}>{temperature}°{unit}</div>
               <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3 shrink-0" />{props.location}
+                <MapPin className="h-3 w-3 shrink-0" />{location}
               </div>
             </div>
           </div>
@@ -1713,28 +1796,28 @@ export const { registry } = defineRegistry(chatCatalog, {
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-                  <MapPin className="h-3 w-3 shrink-0" />{props.location}
+                  <MapPin className="h-3 w-3 shrink-0" />{location}
                 </div>
-                <div className={cn('font-bold leading-none', tempClass)}>{props.temperature}°{unit}</div>
+                <div className={cn('font-bold leading-none', tempClass)}>{temperature}°{unit}</div>
                 <div className="text-sm text-muted-foreground mt-1">{cfg.label}</div>
-                {props.feelsLike != null && (
+                {feelsLike != null && (
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                    <Thermometer className="h-3 w-3 shrink-0" />Feels like {props.feelsLike}°{unit}
+                    <Thermometer className="h-3 w-3 shrink-0" />Feels like {feelsLike}°{unit}
                   </div>
                 )}
               </div>
-              <cfg.IconComp className={cn('shrink-0 h-10 w-10', cfg.iconColor)} />
+              <IconComponent className={cn('shrink-0 h-10 w-10', cfg.iconColor)} />
             </div>
-            {(props.humidity != null || props.wind != null) && (
+            {(humidity != null || wind != null) && (
               <div className="mt-4 flex gap-4 border-t border-border/40 pt-3">
-                {props.humidity != null && (
+                {humidity != null && (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Droplets className="h-3.5 w-3.5 shrink-0 text-blue-400" />{props.humidity}% humidity
+                    <Droplets className="h-3.5 w-3.5 shrink-0 text-blue-400" />{humidity}% humidity
                   </div>
                 )}
-                {props.wind != null && (
+                {wind != null && (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Wind className="h-3.5 w-3.5 shrink-0 text-teal-400" />{props.wind} km/h
+                    <Wind className="h-3.5 w-3.5 shrink-0 text-teal-400" />{wind} km/h
                   </div>
                 )}
               </div>
@@ -1750,45 +1833,45 @@ export const { registry } = defineRegistry(chatCatalog, {
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                <MapPin className="h-3.5 w-3.5 shrink-0" />{props.location}
+                <MapPin className="h-3.5 w-3.5 shrink-0" />{location}
               </div>
-              <div className={cn('font-bold leading-none', tempClass)}>{props.temperature}°{unit}</div>
+              <div className={cn('font-bold leading-none', tempClass)}>{temperature}°{unit}</div>
               <div className={cn('text-sm font-medium mt-1', cfg.iconColor)}>{cfg.label}</div>
-              {props.feelsLike != null && (
+              {feelsLike != null && (
                 <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                  <Thermometer className="h-3 w-3 shrink-0" />Feels {props.feelsLike}°{unit}
+                  <Thermometer className="h-3 w-3 shrink-0" />Feels {feelsLike}°{unit}
                 </div>
               )}
             </div>
-            <cfg.IconComp className={cn('shrink-0 h-12 w-12', cfg.iconColor)} />
+            <IconComponent className={cn('shrink-0 h-12 w-12', cfg.iconColor)} />
           </div>
 
-          {/* Stats row */}
-          {(props.humidity != null || props.wind != null) && (
+          {(humidity != null || wind != null) && (
             <div className="mt-3 flex gap-4 border-t border-border/40 pt-2.5">
-              {props.humidity != null && (
+              {humidity != null && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Droplets className="h-3.5 w-3.5 shrink-0 text-blue-400" />{props.humidity}% humidity
+                  <Droplets className="h-3.5 w-3.5 shrink-0 text-blue-400" />{humidity}% humidity
                 </div>
               )}
-              {props.wind != null && (
+              {wind != null && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Wind className="h-3.5 w-3.5 shrink-0 text-teal-400" />{props.wind} km/h
+                  <Wind className="h-3.5 w-3.5 shrink-0 text-teal-400" />{wind} km/h
                 </div>
               )}
             </div>
           )}
 
           {/* 5-day forecast */}
-          {props.forecast && props.forecast.length > 0 && (
+          {forecast && forecast.length > 0 && (
             <div className="mt-3 border-t border-border/40 pt-3">
               <div className="flex flex-row justify-between w-full">
-                {props.forecast.slice(0, 5).map((day, i) => {
+                {forecast.slice(0, 5).map((day: any, i: number) => {
                   const dc = COND[day.condition as Condition] ?? COND.cloudy;
+                  const DayIcon = dc.IconComp as any;
                   return (
                     <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', flex: '1' }}>
                       <span style={{ fontSize: '11px', color: 'var(--muted-foreground)', fontWeight: 500 }}>{day.day}</span>
-                      <dc.IconComp className={cn('h-4 w-4 shrink-0', dc.iconColor)} />
+                      <DayIcon className={cn('h-4 w-4 shrink-0', dc.iconColor)} />
                       <span style={{ fontSize: '11px', fontWeight: 600 }}>{day.high}°</span>
                       <span style={{ fontSize: '11px', color: 'var(--muted-foreground)' }}>{day.low}°</span>
                     </div>
@@ -1802,6 +1885,7 @@ export const { registry } = defineRegistry(chatCatalog, {
     },
 
     MDCBlock: ({ props }) => {
+      const content = (props.content as string) ?? '';
       // Parse MDC: split on lines that start with ::ComponentName{...} or ::ComponentName
       const MDC_DIRECTIVE = /^::([A-Z][a-zA-Z0-9]*)(\{.*\})?$/;
 
@@ -1865,7 +1949,7 @@ export const { registry } = defineRegistry(chatCatalog, {
         return result;
       }
 
-      const lines = (props.content ?? '').split('\n');
+      const lines = content.split('\n');
       const segments: Array<{ type: 'markdown'; text: string } | { type: 'component'; name: string; props: Record<string, unknown> }> = [];
       let textBuffer: string[] = [];
 

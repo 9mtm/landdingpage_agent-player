@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { Spec } from '../core/types';
+import type { Spec } from '../core/index';
 import type { Registry } from './registry';
 
 interface RendererProps {
