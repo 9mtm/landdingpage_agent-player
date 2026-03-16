@@ -1769,11 +1769,15 @@ interface AnimPanelProps {
   onDeleteAnim: (id: string) => void;
   animUploadStatus: 'idle' | 'uploading' | 'done' | 'error';
   animFileInputRef: RefObject<HTMLInputElement | null>;
+  // Avatar selection (Demo Mode)
+  avatarUrl?: string;
+  onAvatarUrlChange?: (url: string) => void;
+  onCacheStatusChange?: (status: 'checking' | 'local' | 'cdn') => void;
 }
 
 type PanelTab = 'anim' | 'scene' | 'camera' | 'fx' | 'notif' | 'ui';
 
-function AnimPanel({ gender, activeUrl, onSelect, onGenderToggle, avatarY, onAvatarYChange, onPreset, bgColor, onBgColorChange, bgSaved, bgScene, onBgSceneChange, wallText, onWallTextChange, wallLogoUrl, onWallLogoUrlChange, wallVideoUrl, onWallVideoUrlChange, wallLayout, onWallLayoutChange, youtubeNoCookie, onYoutubeNoCookieChange, hasDraftChanges, onApply, matrixOn, onMatrixToggle, matrixSpeed, onMatrixSpeedChange, matrixOpacity, onMatrixOpacityChange, matrixDensity, onMatrixDensityChange, onEmojiRain, onDemoNotif, fxState, onFxChange, notifAutoWeather, onNotifAutoWeatherChange, onApplyPreset, spotifyUrl, onSpotifyUrlChange, spotifyOpen, onSpotifyToggle, onDemoUiOverlay, onSendGif, showShadow, onShowShadowChange, customAnims, onUploadAnim, onDeleteAnim, animUploadStatus, animFileInputRef }: AnimPanelProps) {
+function AnimPanel({ gender, activeUrl, onSelect, onGenderToggle, avatarY, onAvatarYChange, onPreset, bgColor, onBgColorChange, bgSaved, bgScene, onBgSceneChange, wallText, onWallTextChange, wallLogoUrl, onWallLogoUrlChange, wallVideoUrl, onWallVideoUrlChange, wallLayout, onWallLayoutChange, youtubeNoCookie, onYoutubeNoCookieChange, hasDraftChanges, onApply, matrixOn, onMatrixToggle, matrixSpeed, onMatrixSpeedChange, matrixOpacity, onMatrixOpacityChange, matrixDensity, onMatrixDensityChange, onEmojiRain, onDemoNotif, fxState, onFxChange, notifAutoWeather, onNotifAutoWeatherChange, onApplyPreset, spotifyUrl, onSpotifyUrlChange, spotifyOpen, onSpotifyToggle, onDemoUiOverlay, onSendGif, showShadow, onShowShadowChange, customAnims, onUploadAnim, onDeleteAnim, animUploadStatus, animFileInputRef, avatarUrl, onAvatarUrlChange, onCacheStatusChange }: AnimPanelProps) {
   const [tab, setTab] = useState<PanelTab>('anim');
   const [notifSearch, setNotifSearch] = useState('');
   const [uiSearch, setUiSearch]       = useState('');
@@ -1989,8 +1993,8 @@ function AnimPanel({ gender, activeUrl, onSelect, onGenderToggle, avatarY, onAva
                   <button
                     key={url}
                     onClick={() => {
-                      setAvatarUrl(url);
-                      setCacheStatus('local');
+                      if (onAvatarUrlChange) onAvatarUrlChange(url);
+                      if (onCacheStatusChange) onCacheStatusChange('local');
                       console.log('[Demo] Switched to:', label);
                     }}
                     className={`text-xs py-1.5 px-2 rounded text-left truncate transition-colors ${
@@ -2945,18 +2949,20 @@ function AvatarViewerContent() {
   const sidebarDragRef = useRef<{ startX: number; startW: number } | null>(null);
   const [vadEnabled, setVadEnabled]   = useState(false);
   const { devMode, toggle: toggleDevMode, setDevMode } = useDeveloperMode();
-  const [showAnimPanel, setShowAnimPanel] = useState(false);
+  // ✅ In Demo Mode: Show panel by default
+  const [showAnimPanel, setShowAnimPanel] = useState(config.isDemoMode);
 
-  // ✅ Auto-enable Developer Mode in Demo Mode (on mount only)
+  // ✅ Auto-enable Developer Mode + Show Panel in Demo Mode (on mount only)
   useEffect(() => {
-    if (config.isDemoMode && !devMode) {
-      setDevMode(true);
+    if (config.isDemoMode) {
+      if (!devMode) setDevMode(true);
+      if (!showAnimPanel) setShowAnimPanel(true);
     }
   }, []); // Run only once on mount
 
-  // Force-hide panel when dev mode is turned off
+  // Force-hide panel when dev mode is turned off (only in Full Mode)
   useEffect(() => {
-    if (!devMode) setShowAnimPanel(false);
+    if (!config.isDemoMode && !devMode) setShowAnimPanel(false);
   }, [devMode]);
 
   // Agent selector
@@ -4817,6 +4823,9 @@ function AvatarViewerContent() {
             onDeleteAnim={deleteAnimation}
             animUploadStatus={animUploadStatus}
             animFileInputRef={animFileInputRef}
+            avatarUrl={avatarUrl}
+            onAvatarUrlChange={setAvatarUrl}
+            onCacheStatusChange={setCacheStatus}
           />
         )}
       </div>
