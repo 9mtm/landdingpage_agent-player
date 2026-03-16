@@ -2944,8 +2944,15 @@ function AvatarViewerContent() {
   const [sidebarWidth, setSidebarWidth] = useState(288);
   const sidebarDragRef = useRef<{ startX: number; startW: number } | null>(null);
   const [vadEnabled, setVadEnabled]   = useState(false);
-  const { devMode, toggle: toggleDevMode } = useDeveloperMode();
+  const { devMode, toggle: toggleDevMode, setDevMode } = useDeveloperMode();
   const [showAnimPanel, setShowAnimPanel] = useState(false);
+
+  // ✅ Auto-enable Developer Mode in Demo Mode (on mount only)
+  useEffect(() => {
+    if (config.isDemoMode && !devMode) {
+      setDevMode(true);
+    }
+  }, []); // Run only once on mount
 
   // Force-hide panel when dev mode is turned off
   useEffect(() => {
