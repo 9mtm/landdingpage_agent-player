@@ -1970,6 +1970,43 @@ function AnimPanel({ gender, activeUrl, onSelect, onGenderToggle, avatarY, onAva
       {tab === 'scene' && (
         <div className="flex-1 overflow-y-auto flex flex-col">
         <div className="flex-1 p-2 space-y-3 overflow-y-auto">
+          {/* ✅ Avatar Selection (Demo Mode Only) */}
+          {config.isDemoMode && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs text-gray-500 font-semibold flex items-center gap-1">
+                  <Users className="w-3 h-3" /> Choose Avatar
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                {[
+                  { url: '/avatars/demo-avatar-male.glb', label: 'Male Avatar' },
+                  { url: '/avatars/demo-avatar-female.glb', label: 'Female Avatar' },
+                  { url: '/avatars/demo-avatar-3.glb', label: 'Avatar 3' },
+                  { url: '/avatars/demo-avatar-4.glb', label: 'Avatar 4' },
+                  { url: '/avatars/demo-avatar-fbx.fbx', label: 'FBX Avatar' },
+                ].map(({ url, label }) => (
+                  <button
+                    key={url}
+                    onClick={() => {
+                      setAvatarUrl(url);
+                      setCacheStatus('local');
+                      console.log('[Demo] Switched to:', label);
+                    }}
+                    className={`text-xs py-1.5 px-2 rounded text-left truncate transition-colors ${
+                      avatarUrl === url
+                        ? 'bg-blue-600 text-white font-medium'
+                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                    }`}
+                    title={label}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Background color */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
@@ -2806,6 +2843,16 @@ function AvatarViewerContent() {
   useEffect(() => {
     // If neither ?id= nor ?url= are provided, auto-load the active avatar
     if (!avatarId && !rawAvatarUrl) {
+      // ✅ Demo Mode: Use local demo avatars
+      if (config.isDemoMode) {
+        const demoAvatar = '/avatars/demo-avatar-male.glb';
+        setAvatarUrl(demoAvatar);
+        setCacheStatus('local');
+        console.log('[Demo] Using demo avatar:', demoAvatar);
+        return;
+      }
+
+      // ✅ Full Mode: Fetch from backend
       fetch(`${config.backendUrl}/api/avatars?userId=1`)
         .then(r => r.json())
         .then(data => {
@@ -4285,9 +4332,12 @@ function AvatarViewerContent() {
             <SlidersHorizontal className="w-4 h-4" />
           </button>
         )}
-        <a href="/settings/avatar" className="p-2 hover:bg-gray-700 rounded-lg transition-colors text-gray-300" title="Avatar Settings">
-          <Settings className="w-4 h-4" />
-        </a>
+        {/* Avatar Settings - Only show in Full Mode */}
+        {!config.isDemoMode && (
+          <a href="/settings/avatar" className="p-2 hover:bg-gray-700 rounded-lg transition-colors text-gray-300" title="Avatar Settings">
+            <Settings className="w-4 h-4" />
+          </a>
+        )}
         <button
           onClick={toggleCamera}
           className={`p-2 rounded-lg transition-colors ${cameraOn ? 'bg-blue-600 text-white hover:bg-blue-700' : 'hover:bg-gray-700 text-gray-300'}`}

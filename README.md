@@ -14,9 +14,10 @@ Official landing page for [Agent Player](https://github.com/9mtm/Agent-Player) -
 ### 🎮 **Live Demo** (`/demo`)
 - **Full AvatarViewer** - Complete copy from main project
 - **Demo Mode** - Works standalone, no backend needed
+- **5 Demo Avatars** - Ready to use (4 GLB + 1 FBX)
 - **6 Interactive Tabs**:
-  - Animations (50+ animations)
-  - Scene (background colors, walls)
+  - Animations (120+ animations - masculine/feminine)
+  - Scene (background colors, walls, avatar selector)
   - Camera (presets, positioning)
   - FX (12 visual effects)
   - Notifications (27 types)
@@ -92,7 +93,8 @@ NEXT_PUBLIC_BACKEND_URL=
 │   ├── config.ts         # Configuration
 │   └── demo-mock.ts      # Mock API for demo mode
 ├── public/
-│   ├── animations/       # 29MB of avatar animations
+│   ├── avatars/          # 5 demo avatars (GLB + FBX) - 34MB
+│   ├── animations/       # 120+ avatar animations - 29MB
 │   └── images/           # Screenshots
 └── contexts/             # React contexts
 ```
