@@ -567,8 +567,8 @@ export const { registry } = defineRegistry(chatCatalog, {
           </ResponsiveContainer>
 
           {/* Volume Bars */}
-          {props.showVolume && (
-            <ResponsiveContainer width="100%" height={(props.height ?? 500) * 0.25}>
+          {showVolume && (
+            <ResponsiveContainer width="100%" height={height * 0.25}>
               <RechartsBarChart data={candleData}>
                 <XAxis dataKey="timestamp" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
@@ -596,23 +596,26 @@ export const { registry } = defineRegistry(chatCatalog, {
 
     OptionsChainTable: ({ props }) => {
       const chains = Array.isArray(props.chains) ? props.chains : [];
+      const symbol = props.symbol as React.ReactNode;
+      const expirationDate = props.expirationDate as React.ReactNode;
+      const currentPrice = (props.currentPrice as number) ?? 0;
+      const height = (props.height as number) ?? 600;
+      const highlightATM = props.highlightATM as boolean;
       if (chains.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">No options data</p>;
-
-      const currentPrice = props.currentPrice ?? 0;
 
       return (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-lg">{props.symbol}</span>
-              <span className="text-sm text-muted-foreground">Exp: {props.expirationDate}</span>
+              <span className="font-bold text-lg">{symbol}</span>
+              <span className="text-sm text-muted-foreground">Exp: {expirationDate}</span>
             </div>
             {currentPrice > 0 && (
               <span className="text-sm">Current: <span className="font-mono font-semibold">${currentPrice.toFixed(2)}</span></span>
             )}
           </div>
 
-          <div className="border rounded-lg overflow-hidden" style={{ maxHeight: props.height ?? 600, overflowY: 'auto' }}>
+          <div className="border rounded-lg overflow-hidden" style={{ maxHeight: height, overflowY: 'auto' }}>
             <table className="w-full text-xs">
               <thead className="bg-muted sticky top-0">
                 <tr>
@@ -636,7 +639,7 @@ export const { registry } = defineRegistry(chatCatalog, {
               </thead>
               <tbody>
                 {chains.map((chain, idx) => {
-                  const isATM = props.highlightATM && Math.abs(chain.strike - currentPrice) < 5;
+                  const isATM = highlightATM && Math.abs(chain.strike - currentPrice) < 5;
                   return (
                     <tr key={idx} className={cn('hover:bg-muted/50', isATM && 'bg-yellow-50')}>
                       {/* Calls */}
@@ -665,6 +668,9 @@ export const { registry } = defineRegistry(chatCatalog, {
 
     PortfolioPerformanceChart: ({ props }) => {
       const data = Array.isArray(props.data) ? props.data : [];
+      const height = (props.height as number) ?? 400;
+      const showBenchmark = props.showBenchmark as boolean;
+      const benchmarkName = (props.benchmarkName as string) ?? 'Benchmark';
       if (data.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">No performance data</p>;
 
       // Calculate percentage change
@@ -693,7 +699,7 @@ export const { registry } = defineRegistry(chatCatalog, {
             </div>
           </div>
 
-          <ResponsiveContainer width="100%" height={props.height ?? 400}>
+          <ResponsiveContainer width="100%" height={height}>
             <RechartsLineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="date" tick={{ fontSize: 11 }} />
@@ -711,11 +717,11 @@ export const { registry } = defineRegistry(chatCatalog, {
                 strokeWidth={2}
                 dot={false}
               />
-              {props.showBenchmark && (
+              {showBenchmark && (
                 <Line
                   type="monotone"
                   dataKey="benchmarkReturn"
-                  name={props.benchmarkName ?? 'Benchmark'}
+                  name={benchmarkName}
                   stroke="#9ca3af"
                   strokeWidth={2}
                   strokeDasharray="5 5"
@@ -730,6 +736,8 @@ export const { registry } = defineRegistry(chatCatalog, {
 
     AssetAllocationPie: ({ props }) => {
       const holdings = Array.isArray(props.holdings) ? props.holdings : [];
+      const height = (props.height as number) ?? 400;
+      const showPercentages = props.showPercentages as boolean;
       if (holdings.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">No holdings</p>;
 
       const totalValue = holdings.reduce((sum, h) => sum + h.value, 0);
@@ -741,7 +749,7 @@ export const { registry } = defineRegistry(chatCatalog, {
             <span className="text-sm text-muted-foreground">Total: ${totalValue.toLocaleString()}</span>
           </div>
 
-          <ResponsiveContainer width="100%" height={props.height ?? 400}>
+          <ResponsiveContainer width="100%" height={height}>
             <RechartsPieChart>
               <Pie
                 data={holdings.map(h => ({
@@ -755,7 +763,7 @@ export const { registry } = defineRegistry(chatCatalog, {
                 outerRadius="70%"
                 paddingAngle={2}
                 dataKey="value"
-                label={props.showPercentages ? ({ name, percentage }) => `${name} ${percentage}%` : undefined}
+                label={showPercentages ? ({ name, percentage }: any) => `${name} ${percentage}%` : undefined}
               >
                 {holdings.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
               </Pie>
@@ -797,20 +805,27 @@ export const { registry } = defineRegistry(chatCatalog, {
     },
 
     // ── Interactive ───────────────────────────────────────────────────────────
-    Tabs: ({ props, children }) => (
-      <Tabs defaultValue={props.defaultValue ?? props.tabs?.[0]?.value}>
-        <TabsList>
-          {(props.tabs ?? []).map(tab => (
-            <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
-          ))}
-        </TabsList>
-        {children}
-      </Tabs>
-    ),
+    Tabs: ({ props, children }) => {
+      const tabs = (props.tabs as Array<{ value: string; label: string }>) ?? [];
+      const defaultValue = (props.defaultValue as string) ?? tabs[0]?.value;
+      return (
+        <Tabs defaultValue={defaultValue}>
+          <TabsList>
+            {tabs.map(tab => (
+              <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+            ))}
+          </TabsList>
+          {children}
+        </Tabs>
+      );
+    },
 
-    TabContent: ({ props, children }) => (
-      <TabsContent value={props.value}>{children}</TabsContent>
-    ),
+    TabContent: ({ props, children }) => {
+      const value = props.value as string;
+      return (
+        <TabsContent value={value}>{children}</TabsContent>
+      );
+    },
 
     Button: ({ props, emit }) => (
       <Button
