@@ -48,7 +48,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const authHeader = () => {
+  const authHeader = (): Record<string, string> => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
     return token ? { Authorization: `Bearer ${token}` } : {};
   };

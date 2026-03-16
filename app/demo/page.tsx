@@ -2240,7 +2240,7 @@ function AnimPanel({ gender, activeUrl, onSelect, onGenderToggle, avatarY, onAva
             <div className="text-xs text-gray-500 font-semibold mb-2">Weather Presets</div>
             <div className="grid grid-cols-2 gap-1 mb-2">
               {WEATHER_PRESETS.map(preset => {
-                const Icon = preset.icon;
+                const IconComponent = preset.icon as React.ComponentType<{ className?: string }>;
                 const isActive = (() => {
                   const keys = Object.keys(preset.fx) as (keyof FxState)[];
                   return keys.length > 0 && keys.every(k => {
@@ -2259,7 +2259,7 @@ function AnimPanel({ gender, activeUrl, onSelect, onGenderToggle, avatarY, onAva
                         : 'bg-gray-700/80 hover:bg-gray-600 text-gray-300'
                     }`}
                   >
-                    <Icon className={`h-3.5 w-3.5 shrink-0 ${preset.color}`} />
+                    <IconComponent className={`h-3.5 w-3.5 shrink-0 ${preset.color}`} />
                     <span>{preset.label}</span>
                   </button>
                 );
@@ -3956,7 +3956,7 @@ function AvatarViewerContent() {
                   try {
                     const patch = JSON.parse(line);
                     if (patch.op === 'add' && patch.path && patch.value !== undefined) {
-                      const pathParts = patch.path.split('/').filter(p => p);
+                      const pathParts = patch.path.split('/').filter((p: string) => p);
                       if (pathParts[0] === 'root') {
                         spec.root = patch.value;
                       } else if (pathParts[0] === 'elements' && pathParts[1]) {

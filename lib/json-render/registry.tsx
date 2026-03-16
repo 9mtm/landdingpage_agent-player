@@ -138,13 +138,17 @@ function getComponentFromRegistry(name: string) {
 export const { registry } = defineRegistry(chatCatalog, {
   components: {
     // ── Layout ────────────────────────────────────────────────────────────────
-    Card: ({ props, children }) => (
-      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-        {props.title && <h3 className="font-semibold text-sm">{props.title}</h3>}
-        {props.description && <p className="text-xs text-muted-foreground">{props.description}</p>}
-        {children}
-      </div>
-    ),
+    Card: ({ props, children }) => {
+      const title = props.title as React.ReactNode;
+      const description = props.description as React.ReactNode;
+      return (
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+          {title && <h3 className="font-semibold text-sm">{title}</h3>}
+          {description && <p className="text-xs text-muted-foreground">{description}</p>}
+          {children}
+        </div>
+      );
+    },
 
     Stack: ({ props, children }) => (
       <div className={cn(

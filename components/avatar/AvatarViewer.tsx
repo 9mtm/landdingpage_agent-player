@@ -657,7 +657,7 @@ interface AvatarModelProps {
   facialExpression?: FacialExpression;
   lipsyncCues?: LipsyncCue[];
   audioEl?: HTMLAudioElement | null;
-  avatarRef?: React.RefObject<THREE.Group>;
+  avatarRef?: React.RefObject<THREE.Group | null>;
 }
 
 /** Bridge: picks the right loader based on file extension, passes scene+anims to core */
