@@ -827,32 +827,39 @@ export const { registry } = defineRegistry(chatCatalog, {
       );
     },
 
-    Button: ({ props, emit }) => (
-      <Button
-        variant={(props.variant ?? 'default') as any}
-        size={(props.size ?? 'default') as any}
-        onClick={() => emit('press')}
-      >
-        {props.label}
-      </Button>
-    ),
+    Button: ({ props, emit }) => {
+      const label = props.label as React.ReactNode;
+      return (
+        <Button
+          variant={(props.variant ?? 'default') as any}
+          size={(props.size ?? 'default') as any}
+          onClick={() => emit('press')}
+        >
+          {label}
+        </Button>
+      );
+    },
 
     // ── shadcn Extensions ─────────────────────────────────────────────────────
     ProgressBar: ({ props }) => {
-      const max = props.max ?? 100;
-      const pct = Math.round(Math.min(100, Math.max(0, (props.value / max) * 100)));
+      const max = (props.max as number) ?? 100;
+      const value = (props.value as number) ?? 0;
+      const color = (props.color as string) ?? 'default';
+      const label = props.label as React.ReactNode;
+      const showPercent = props.showPercent as boolean;
+      const pct = Math.round(Math.min(100, Math.max(0, (value / max) * 100)));
       const colorMap: Record<string, string> = {
         success: '[&>div]:bg-emerald-500',
         warning: '[&>div]:bg-amber-500',
         destructive: '[&>div]:bg-destructive',
         default: '',
       };
-      const colorClass = colorMap[props.color ?? 'default'] ?? '';
+      const colorClass = colorMap[color] ?? '';
       return (
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs">
-            <span className="font-medium text-sm">{props.label}</span>
-            {props.showPercent !== false && (
+            <span className="font-medium text-sm">{label}</span>
+            {showPercent !== false && (
               <span className="text-muted-foreground">{pct}%</span>
             )}
           </div>
@@ -861,39 +868,50 @@ export const { registry } = defineRegistry(chatCatalog, {
       );
     },
 
-    Alert: ({ props }) => (
-      <Alert variant={(props.variant ?? 'default') as any}>
-        {props.title && <AlertTitle>{props.title}</AlertTitle>}
-        <AlertDescription>{props.description}</AlertDescription>
-      </Alert>
-    ),
+    Alert: ({ props }) => {
+      const title = props.title as React.ReactNode;
+      const description = props.description as React.ReactNode;
+      return (
+        <Alert variant={(props.variant ?? 'default') as any}>
+          {title && <AlertTitle>{title}</AlertTitle>}
+          <AlertDescription>{description}</AlertDescription>
+        </Alert>
+      );
+    },
 
     UserCard: ({ props }) => {
-      const initials = props.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const name = (props.name as string) ?? '';
+      const size = (props.size as 'sm' | 'md' | 'lg') ?? 'md';
+      const src = props.src as string | undefined;
+      const role = props.role as React.ReactNode;
+      const email = props.email as React.ReactNode;
+      const initials = name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
       const sizeMap = { sm: 'h-8 w-8 text-xs', md: 'h-10 w-10 text-sm', lg: 'h-14 w-14 text-base' };
-      const avatarSize = sizeMap[props.size ?? 'md'];
+      const avatarSize = sizeMap[size];
       return (
         <div className="flex items-center gap-3">
           <Avatar className={avatarSize}>
-            {props.src && <AvatarImage src={props.src} alt={props.name} />}
+            {src && <AvatarImage src={src} alt={name} />}
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
-            <span className="font-medium text-sm truncate">{props.name}</span>
-            {props.role && <span className="text-xs text-muted-foreground truncate">{props.role}</span>}
-            {props.email && <span className="text-xs text-muted-foreground truncate">{props.email}</span>}
+            <span className="font-medium text-sm truncate">{name}</span>
+            {role && <span className="text-xs text-muted-foreground truncate">{role}</span>}
+            {email && <span className="text-xs text-muted-foreground truncate">{email}</span>}
           </div>
         </div>
       );
     },
 
     SwitchRow: ({ props }) => {
-      const [checked, setChecked] = useState(props.checked);
+      const label = props.label as React.ReactNode;
+      const description = props.description as React.ReactNode;
+      const [checked, setChecked] = useState(props.checked as boolean);
       return (
         <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
           <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium">{props.label}</span>
-            {props.description && <span className="text-xs text-muted-foreground">{props.description}</span>}
+            <span className="text-sm font-medium">{label}</span>
+            {description && <span className="text-xs text-muted-foreground">{description}</span>}
           </div>
           <Switch checked={checked} onCheckedChange={setChecked} />
         </div>
@@ -902,64 +920,77 @@ export const { registry } = defineRegistry(chatCatalog, {
 
     // ── Form Inputs ───────────────────────────────────────────────────────────
     InputField: ({ props }) => {
-      const [val, setVal] = useState(props.value ?? '');
+      const label = props.label as React.ReactNode;
+      const type = (props.type as string) ?? 'text';
+      const placeholder = props.placeholder as string | undefined;
+      const description = props.description as React.ReactNode;
+      const [val, setVal] = useState((props.value as string) ?? '');
       return (
         <div className="flex flex-col gap-1.5">
-          <Label className="text-sm font-medium">{props.label}</Label>
+          <Label className="text-sm font-medium">{label}</Label>
           <Input
-            type={(props.type ?? 'text') as string}
-            placeholder={props.placeholder ?? undefined}
+            type={type}
+            placeholder={placeholder}
             value={val}
             onChange={e => setVal(e.target.value)}
           />
-          {props.description && <p className="text-xs text-muted-foreground">{props.description}</p>}
+          {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </div>
       );
     },
 
     SelectField: ({ props }) => {
-      const [val, setVal] = useState(props.value ?? '');
+      const label = props.label as React.ReactNode;
+      const placeholder = (props.placeholder as string) ?? 'Select...';
+      const options = (props.options as Array<{ value: string; label: string }>) ?? [];
+      const description = props.description as React.ReactNode;
+      const [val, setVal] = useState((props.value as string) ?? '');
       return (
         <div className="flex flex-col gap-1.5">
-          <Label className="text-sm font-medium">{props.label}</Label>
+          <Label className="text-sm font-medium">{label}</Label>
           <Select value={val} onValueChange={setVal}>
             <SelectTrigger>
-              <SelectValue placeholder={props.placeholder ?? 'Select...'} />
+              <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>
-              {(props.options ?? []).map(opt => (
+              {options.map(opt => (
                 <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {props.description && <p className="text-xs text-muted-foreground">{props.description}</p>}
+          {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </div>
       );
     },
 
     TextArea: ({ props }) => {
-      const [val, setVal] = useState(props.value ?? '');
+      const label = props.label as React.ReactNode;
+      const placeholder = props.placeholder as string | undefined;
+      const rows = (props.rows as number) ?? 3;
+      const description = props.description as React.ReactNode;
+      const [val, setVal] = useState((props.value as string) ?? '');
       return (
         <div className="flex flex-col gap-1.5">
-          <Label className="text-sm font-medium">{props.label}</Label>
+          <Label className="text-sm font-medium">{label}</Label>
           <Textarea
-            placeholder={props.placeholder ?? undefined}
+            placeholder={placeholder}
             value={val}
-            rows={props.rows ?? 3}
+            rows={rows}
             onChange={e => setVal(e.target.value)}
           />
-          {props.description && <p className="text-xs text-muted-foreground">{props.description}</p>}
+          {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </div>
       );
     },
 
     CheckboxList: ({ props }) => {
+      const items = (props.items as Array<{ id: string; label: React.ReactNode; checked: boolean; disabled?: boolean }>) ?? [];
       const [checked, setChecked] = useState<Record<string, boolean>>(
-        Object.fromEntries((props.items ?? []).map(item => [item.id, item.checked]))
+        Object.fromEntries(items.map(item => [item.id, item.checked]))
       );
       return (
         <div className="flex flex-col gap-2">
-          {(props.items ?? []).map(item => (
+          {items.map(item => (
             <div key={item.id} className="flex items-center gap-2.5">
               <Checkbox
                 id={item.id}
