@@ -1011,33 +1011,38 @@ export const { registry } = defineRegistry(chatCatalog, {
     },
 
     RadioGroup: ({ props }) => {
-      const [val, setVal] = useState(props.value ?? '');
+      const label = props.label as React.ReactNode;
+      const options = (props.options as Array<{ value: string; label: React.ReactNode }>) ?? [];
+      const description = props.description as React.ReactNode;
+      const [val, setVal] = useState((props.value as string) ?? '');
       return (
         <div className="flex flex-col gap-2">
-          {props.label && <Label className="text-sm font-medium">{props.label}</Label>}
+          {label && <Label className="text-sm font-medium">{label}</Label>}
           <RadioGroup value={val} onValueChange={setVal} className="flex flex-col gap-2">
-            {(props.options ?? []).map(opt => (
+            {options.map(opt => (
               <div key={opt.value} className="flex items-center gap-2">
                 <RadioGroupItem value={opt.value} id={`rg-${opt.value}`} />
                 <label htmlFor={`rg-${opt.value}`} className="text-sm cursor-pointer">{opt.label}</label>
               </div>
             ))}
           </RadioGroup>
-          {props.description && <p className="text-xs text-muted-foreground mt-1">{props.description}</p>}
+          {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
         </div>
       );
     },
 
     SliderRow: ({ props }) => {
-      const [val, setVal] = useState([props.value]);
-      const min = props.min ?? 0;
-      const max = props.max ?? 100;
-      const step = props.step ?? 1;
+      const min = (props.min as number) ?? 0;
+      const max = (props.max as number) ?? 100;
+      const step = (props.step as number) ?? 1;
+      const label = props.label as React.ReactNode;
+      const showValue = props.showValue as boolean;
+      const [val, setVal] = useState([(props.value as number)]);
       return (
         <div className="flex flex-col gap-2">
           <div className="flex justify-between text-sm">
-            <span className="font-medium">{props.label}</span>
-            {props.showValue !== false && (
+            <span className="font-medium">{label}</span>
+            {showValue !== false && (
               <span className="text-muted-foreground">{val[0]}</span>
             )}
           </div>
@@ -1057,7 +1062,7 @@ export const { registry } = defineRegistry(chatCatalog, {
     },
 
     SkeletonBlock: ({ props }) => {
-      const lines = props.lines ?? 3;
+      const lines = (props.lines as number) ?? 3;
       if (props.type === 'card') {
         return (
           <div className="rounded-xl border border-border p-4 space-y-3">
@@ -1088,11 +1093,13 @@ export const { registry } = defineRegistry(chatCatalog, {
     },
 
     CalendarView: ({ props }) => {
-      const selected = (props.selectedDates ?? []).map(d => new Date(d));
+      const selectedDates = (props.selectedDates as Array<string>) ?? [];
+      const title = props.title as React.ReactNode;
+      const selected = selectedDates.map((d: string) => new Date(d));
       const [month, setMonth] = useState(selected[0] ?? new Date());
       return (
         <div className="flex flex-col gap-2">
-          {props.title && <p className="text-sm font-medium">{props.title}</p>}
+          {title && <p className="text-sm font-medium">{title}</p>}
           <Calendar
             mode="multiple"
             selected={selected}
@@ -1145,7 +1152,8 @@ export const { registry } = defineRegistry(chatCatalog, {
 
     // ── Installed extras ──────────────────────────────────────────────────────
     ToggleButton: ({ props }) => {
-      const [pressed, setPressed] = useState(props.pressed ?? false);
+      const label = props.label as React.ReactNode;
+      const [pressed, setPressed] = useState((props.pressed as boolean) ?? false);
       return (
         <Toggle
           pressed={pressed}
@@ -1153,7 +1161,7 @@ export const { registry } = defineRegistry(chatCatalog, {
           variant={(props.variant ?? 'default') as any}
           size={(props.size ?? 'default') as any}
         >
-          {props.label}
+          {label}
         </Toggle>
       );
     },
