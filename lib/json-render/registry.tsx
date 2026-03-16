@@ -150,18 +150,22 @@ export const { registry } = defineRegistry(chatCatalog, {
       );
     },
 
-    Stack: ({ props, children }) => (
-      <div className={cn(
-        'flex',
-        props.direction === 'horizontal' ? 'flex-row flex-wrap' : 'flex-col',
-        GAP[props.gap ?? 'md'] ?? 'gap-4',
-      )}>
-        {children}
-      </div>
-    ),
+    Stack: ({ props, children }) => {
+      const gap = (props.gap as keyof typeof GAP) ?? 'md';
+      return (
+        <div className={cn(
+          'flex',
+          props.direction === 'horizontal' ? 'flex-row flex-wrap' : 'flex-col',
+          GAP[gap] ?? 'gap-4',
+        )}>
+          {children}
+        </div>
+      );
+    },
 
     Grid: ({ props, children }) => {
-      const requested = props.columns ?? 1;
+      const requested = (props.columns as number) ?? 1;
+      const gap = (props.gap as keyof typeof GAP) ?? 'md';
       const [cols, setCols] = useState(requested);
       const ref = useRef<HTMLDivElement>(null);
       useEffect(() => {
@@ -181,7 +185,7 @@ export const { registry } = defineRegistry(chatCatalog, {
       return (
         <div
           ref={ref}
-          className={cn('grid items-start', GAP[props.gap ?? 'md'] ?? 'gap-4')}
+          className={cn('grid items-start', GAP[gap] ?? 'gap-4')}
           style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
         >
           {children}
@@ -194,78 +198,94 @@ export const { registry } = defineRegistry(chatCatalog, {
     // ── Typography ────────────────────────────────────────────────────────────
     Heading: ({ props }) => {
       const Tag = (props.level ?? 'h3') as 'h1' | 'h2' | 'h3' | 'h4';
+      const text = props.text as React.ReactNode;
       const cls = {
         h1: 'text-2xl font-bold',
         h2: 'text-xl font-semibold',
         h3: 'text-base font-semibold',
         h4: 'text-sm font-medium',
       }[Tag];
-      return <Tag className={cls}>{props.text}</Tag>;
+      return <Tag className={cls}>{text}</Tag>;
     },
 
-    Text: ({ props }) => (
-      <p className={cn(
-        props.muted ? 'text-muted-foreground' : '',
-        props.size === 'sm' ? 'text-xs' : props.size === 'lg' ? 'text-base' : 'text-sm',
-      )}>
-        {props.content}
-      </p>
-    ),
+    Text: ({ props }) => {
+      const content = props.content as React.ReactNode;
+      return (
+        <p className={cn(
+          props.muted ? 'text-muted-foreground' : '',
+          props.size === 'sm' ? 'text-xs' : props.size === 'lg' ? 'text-base' : 'text-sm',
+        )}>
+          {content}
+        </p>
+      );
+    },
 
-    Link: ({ props }) => (
-      <a
-        href={props.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-primary underline underline-offset-4 hover:text-primary/80 text-sm"
-      >
-        {props.text}
-      </a>
-    ),
+    Link: ({ props }) => {
+      const href = props.href as string;
+      const text = props.text as React.ReactNode;
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline underline-offset-4 hover:text-primary/80 text-sm"
+        >
+          {text}
+        </a>
+      );
+    },
 
     // ── Data Display ──────────────────────────────────────────────────────────
     Metric: ({ props }) => {
-      const TrendIcon = props.trend === 'up' ? TrendingUp : props.trend === 'down' ? TrendingDown : Minus;
-      const trendColor = props.trend === 'up' ? 'text-emerald-500' : props.trend === 'down' ? 'text-destructive' : 'text-muted-foreground';
+      const trend = props.trend as 'up' | 'down' | undefined;
+      const label = props.label as React.ReactNode;
+      const value = props.value as React.ReactNode;
+      const detail = props.detail as React.ReactNode;
+      const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
+      const trendColor = trend === 'up' ? 'text-emerald-500' : trend === 'down' ? 'text-destructive' : 'text-muted-foreground';
       return (
         <div className="flex flex-col gap-1">
-          <p className="text-xs text-muted-foreground">{props.label}</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
           <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-bold">{props.value}</span>
-            {props.trend && <TrendIcon className={cn('h-4 w-4', trendColor)} />}
+            <span className="text-2xl font-bold">{value}</span>
+            {trend && <TrendIcon className={cn('h-4 w-4', trendColor)} />}
           </div>
-          {props.detail && <p className="text-xs text-muted-foreground">{props.detail}</p>}
+          {detail && <p className="text-xs text-muted-foreground">{detail}</p>}
         </div>
       );
     },
 
     Badge: ({ props }) => {
+      const variant = (props.variant as string) ?? '';
+      const text = props.text as React.ReactNode;
       const variantMap: Record<string, string> = {
         success: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
         warning: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20',
       };
-      const customClass = variantMap[props.variant ?? ''];
+      const customClass = variantMap[variant];
       if (customClass) {
         return (
           <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium', customClass)}>
-            {props.text}
+            {text}
           </span>
         );
       }
       return (
-        <Badge variant={(props.variant as any) ?? 'secondary'}>
-          {props.text}
+        <Badge variant={(variant as any) ?? 'secondary'}>
+          {text}
         </Badge>
       );
     },
 
     Table: ({ props }) => {
       const items = Array.isArray(props.data) ? props.data : [];
+      const columns = (props.columns as Array<{ key: string; label: string }>) ?? [];
+      const emptyMessage = (props.emptyMessage as React.ReactNode) ?? 'No data';
       const [sortKey, setSortKey] = useState<string | null>(null);
       const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
       if (items.length === 0) {
-        return <p className="text-sm text-muted-foreground text-center py-4">{props.emptyMessage ?? 'No data'}</p>;
+        return <p className="text-sm text-muted-foreground text-center py-4">{emptyMessage}</p>;
       }
 
       const sorted = sortKey
@@ -281,7 +301,7 @@ export const { registry } = defineRegistry(chatCatalog, {
           <table className="w-full text-sm">
             <thead className="bg-muted/40">
               <tr>
-                {props.columns.map(col => {
+                {columns.map(col => {
                   const SortIcon = sortKey === col.key ? (sortDir === 'asc' ? ArrowUp : ArrowDown) : ArrowUpDown;
                   return (
                     <th key={col.key} className="px-3 py-2 text-left font-medium text-muted-foreground">
@@ -303,7 +323,7 @@ export const { registry } = defineRegistry(chatCatalog, {
             <tbody className="divide-y divide-border">
               {sorted.map((row, i) => (
                 <tr key={i} className="hover:bg-muted/20 transition-colors">
-                  {props.columns.map(col => (
+                  {columns.map(col => (
                     <td key={col.key} className="px-3 py-2">{String(row[col.key] ?? '')}</td>
                   ))}
                 </tr>
@@ -316,55 +336,62 @@ export const { registry } = defineRegistry(chatCatalog, {
 
     // ── Rich Content ─────────────────────────────────────────────────────────
     Callout: ({ props }) => {
+      const type = (props.type as 'info' | 'tip' | 'warning' | 'important') ?? 'info';
+      const title = props.title as React.ReactNode;
+      const content = props.content as React.ReactNode;
       const config = {
         info: { Icon: Info, border: 'border-l-blue-500', bg: 'bg-blue-500/5', iconColor: 'text-blue-500' },
         tip: { Icon: Lightbulb, border: 'border-l-emerald-500', bg: 'bg-emerald-500/5', iconColor: 'text-emerald-500' },
         warning: { Icon: AlertTriangle, border: 'border-l-amber-500', bg: 'bg-amber-500/5', iconColor: 'text-amber-500' },
         important: { Icon: Star, border: 'border-l-purple-500', bg: 'bg-purple-500/5', iconColor: 'text-purple-500' },
-      }[props.type ?? 'info'] ?? { Icon: Info, border: 'border-l-blue-500', bg: 'bg-blue-500/5', iconColor: 'text-blue-500' };
+      }[type] ?? { Icon: Info, border: 'border-l-blue-500', bg: 'bg-blue-500/5', iconColor: 'text-blue-500' };
       const { Icon, border, bg, iconColor } = config;
       return (
         <div className={cn('border-l-4 rounded-r-lg p-3', border, bg)}>
           <div className="flex items-start gap-2.5">
             <Icon className={cn('h-4 w-4 mt-0.5 shrink-0', iconColor)} />
             <div className="flex-1 min-w-0">
-              {props.title && <p className="font-semibold text-sm mb-0.5">{props.title}</p>}
-              <p className="text-sm text-muted-foreground">{props.content}</p>
+              {title && <p className="font-semibold text-sm mb-0.5">{title}</p>}
+              <p className="text-sm text-muted-foreground">{content}</p>
             </div>
           </div>
         </div>
       );
     },
 
-    Timeline: ({ props }) => (
-      <div className="flex flex-col gap-0">
-        {(props.items ?? []).map((item, i) => {
-          const isLast = i === (props.items ?? []).length - 1;
-          const dot = item.status === 'completed' ? 'bg-emerald-500' : item.status === 'current' ? 'bg-primary ring-2 ring-primary/30' : 'bg-muted-foreground/30';
-          return (
-            <div key={i} className="flex items-start gap-3">
-              <div className="flex flex-col items-center shrink-0" style={{ width: '16px' }}>
-                <div className={cn('mt-1 h-3 w-3 shrink-0 rounded-full ring-2 ring-background', dot)} />
-                {!isLast && <div className="w-px bg-border mt-1" style={{ flex: 1, minHeight: '1.5rem' }} />}
-              </div>
-              <div className="pb-4 min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-medium text-sm">{item.title}</p>
-                  {item.date && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{item.date}</span>}
+    Timeline: ({ props }) => {
+      const items = (props.items as Array<{ status?: string; title: React.ReactNode; date?: string; description?: React.ReactNode }>) ?? [];
+      return (
+        <div className="flex flex-col gap-0">
+          {items.map((item, i) => {
+            const isLast = i === items.length - 1;
+            const dot = item.status === 'completed' ? 'bg-emerald-500' : item.status === 'current' ? 'bg-primary ring-2 ring-primary/30' : 'bg-muted-foreground/30';
+            return (
+              <div key={i} className="flex items-start gap-3">
+                <div className="flex flex-col items-center shrink-0" style={{ width: '16px' }}>
+                  <div className={cn('mt-1 h-3 w-3 shrink-0 rounded-full ring-2 ring-background', dot)} />
+                  {!isLast && <div className="w-px bg-border mt-1" style={{ flex: 1, minHeight: '1.5rem' }} />}
                 </div>
-                {item.description && <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>}
+                <div className="pb-4 min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-sm">{item.title}</p>
+                    {item.date && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{item.date}</span>}
+                  </div>
+                  {item.description && <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-    ),
+            );
+          })}
+        </div>
+      );
+    },
 
     Accordion: ({ props }) => {
+      const items = (props.items as Array<{ title: React.ReactNode; content: React.ReactNode }>) ?? [];
       const [open, setOpen] = useState<number | null>(null);
       return (
         <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
-          {(props.items ?? []).map((item, i) => (
+          {items.map((item, i) => (
             <div key={i}>
               <button
                 type="button"
@@ -388,17 +415,22 @@ export const { registry } = defineRegistry(chatCatalog, {
     // ── Charts ────────────────────────────────────────────────────────────────
     BarChart: ({ props }) => {
       const items = Array.isArray(props.data) ? props.data : [];
+      const title = props.title as React.ReactNode;
+      const height = (props.height as number) ?? 250;
+      const xKey = props.xKey as string;
+      const yKey = props.yKey as string;
+      const color = (props.color as string) ?? '#6366f1';
       if (items.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">No data</p>;
       return (
         <div>
-          {props.title && <p className="text-sm font-medium mb-2">{props.title}</p>}
-          <ResponsiveContainer width="100%" height={props.height ?? 250}>
+          {title && <p className="text-sm font-medium mb-2">{title}</p>}
+          <ResponsiveContainer width="100%" height={height}>
             <RechartsBarChart data={items} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis dataKey={props.xKey} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+              <XAxis dataKey={xKey} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <RechartsTooltip />
-              <Bar dataKey={props.yKey} fill={props.color ?? '#6366f1'} radius={[4, 4, 0, 0]} />
+              <Bar dataKey={yKey} fill={color} radius={[4, 4, 0, 0]} />
             </RechartsBarChart>
           </ResponsiveContainer>
         </div>
@@ -407,17 +439,22 @@ export const { registry } = defineRegistry(chatCatalog, {
 
     LineChart: ({ props }) => {
       const items = Array.isArray(props.data) ? props.data : [];
+      const title = props.title as React.ReactNode;
+      const height = (props.height as number) ?? 250;
+      const xKey = props.xKey as string;
+      const yKey = props.yKey as string;
+      const color = (props.color as string) ?? '#6366f1';
       if (items.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">No data</p>;
       return (
         <div>
-          {props.title && <p className="text-sm font-medium mb-2">{props.title}</p>}
-          <ResponsiveContainer width="100%" height={props.height ?? 250}>
+          {title && <p className="text-sm font-medium mb-2">{title}</p>}
+          <ResponsiveContainer width="100%" height={height}>
             <RechartsLineChart data={items} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis dataKey={props.xKey} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+              <XAxis dataKey={xKey} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <RechartsTooltip />
-              <Line type="monotone" dataKey={props.yKey} stroke={props.color ?? '#6366f1'} strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey={yKey} stroke={color} strokeWidth={2} dot={false} />
             </RechartsLineChart>
           </ResponsiveContainer>
         </div>
@@ -426,16 +463,20 @@ export const { registry } = defineRegistry(chatCatalog, {
 
     PieChart: ({ props }) => {
       const items = Array.isArray(props.data) ? props.data : [];
+      const title = props.title as React.ReactNode;
+      const height = (props.height as number) ?? 250;
+      const nameKey = props.nameKey as string;
+      const valueKey = props.valueKey as string;
       if (items.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">No data</p>;
       return (
         <div>
-          {props.title && <p className="text-sm font-medium mb-2">{props.title}</p>}
-          <ResponsiveContainer width="100%" height={props.height ?? 250}>
+          {title && <p className="text-sm font-medium mb-2">{title}</p>}
+          <ResponsiveContainer width="100%" height={height}>
             <RechartsPieChart>
               <Pie
                 data={items.map(item => ({
-                  name: String(item[props.nameKey] ?? ''),
-                  value: typeof item[props.valueKey] === 'number' ? item[props.valueKey] : parseFloat(String(item[props.valueKey])) || 0,
+                  name: String(item[nameKey] ?? ''),
+                  value: typeof item[valueKey] === 'number' ? item[valueKey] : parseFloat(String(item[valueKey])) || 0,
                 }))}
                 cx="50%"
                 cy="50%"
@@ -457,6 +498,10 @@ export const { registry } = defineRegistry(chatCatalog, {
     // ── Trading Charts ────────────────────────────────────────────────────────
     StockCandlestickChart: ({ props }) => {
       const data = Array.isArray(props.data) ? props.data : [];
+      const symbol = props.symbol as React.ReactNode;
+      const timeframe = (props.timeframe as React.ReactNode) ?? '1D';
+      const showVolume = props.showVolume as boolean;
+      const height = (props.height as number) ?? 500;
       if (data.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">No data</p>;
 
       // Transform OHLC data for display
@@ -477,8 +522,8 @@ export const { registry } = defineRegistry(chatCatalog, {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-lg">{props.symbol}</span>
-              <Badge variant="outline">{props.timeframe ?? '1D'}</Badge>
+              <span className="font-bold text-lg">{symbol}</span>
+              <Badge variant="outline">{timeframe}</Badge>
             </div>
             {data.length > 0 && (
               <div className="flex items-center gap-1 text-sm">
@@ -493,7 +538,7 @@ export const { registry } = defineRegistry(chatCatalog, {
           </div>
 
           {/* Candlestick Chart */}
-          <ResponsiveContainer width="100%" height={props.showVolume ? (props.height ?? 500) * 0.7 : (props.height ?? 500)}>
+          <ResponsiveContainer width="100%" height={showVolume ? height * 0.7 : height}>
             <RechartsAreaChart data={candleData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="timestamp" tick={{ fontSize: 11 }} />
@@ -1015,13 +1060,18 @@ export const { registry } = defineRegistry(chatCatalog, {
 
     AreaChart: ({ props }) => {
       const items = Array.isArray(props.data) ? props.data : [];
+      const title = props.title as React.ReactNode;
+      const height = (props.height as number) ?? 250;
+      const xKey = props.xKey as string;
+      const yKey = props.yKey as string;
+      const color = (props.color as string) ?? '#6366f1';
+      const gradient = props.gradient as boolean;
       if (items.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">No data</p>;
-      const color = props.color ?? '#6366f1';
-      const gradId = `area-grad-${props.yKey}`;
+      const gradId = `area-grad-${yKey}`;
       return (
         <div>
-          {props.title && <p className="text-sm font-medium mb-2">{props.title}</p>}
-          <ResponsiveContainer width="100%" height={props.height ?? 250}>
+          {title && <p className="text-sm font-medium mb-2">{title}</p>}
+          <ResponsiveContainer width="100%" height={height}>
             <RechartsAreaChart data={items} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <defs>
                 <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
@@ -1030,15 +1080,15 @@ export const { registry } = defineRegistry(chatCatalog, {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis dataKey={props.xKey} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+              <XAxis dataKey={xKey} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <RechartsTooltip />
               <Area
                 type="monotone"
-                dataKey={props.yKey}
+                dataKey={yKey}
                 stroke={color}
                 strokeWidth={2}
-                fill={props.gradient !== false ? `url(#${gradId})` : 'transparent'}
+                fill={gradient !== false ? `url(#${gradId})` : 'transparent'}
                 dot={false}
               />
             </RechartsAreaChart>
