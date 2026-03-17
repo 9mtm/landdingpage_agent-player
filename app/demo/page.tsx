@@ -2847,20 +2847,20 @@ function AvatarViewerContent() {
   const addDebug = (msg: string) => { console.log('[DEBUG]', msg); setDebugLog(prev => [...prev, `${new Date().toISOString().slice(11,19)} ${msg}`]); };
 
   useEffect(() => {
+    const DEMO_FALLBACK = '/avatars/demo-avatar-male.glb';
     addDebug(`isDemoMode=${config.isDemoMode}, avatarId="${avatarId}", rawUrl="${rawAvatarUrl}"`);
     addDebug(`NEXT_PUBLIC_DEMO_MODE="${process.env.NEXT_PUBLIC_DEMO_MODE}"`);
     // If neither ?id= nor ?url= are provided, auto-load the active avatar
     if (!avatarId && !rawAvatarUrl) {
       // ✅ Demo Mode: Use local demo avatars
-      if (config.isDemoMode) {
-        const demoAvatar = '/avatars/demo-avatar-male.glb';
-        setAvatarUrl(demoAvatar);
+      if (config.isDemoMode || !config.backendUrl) {
+        setAvatarUrl(DEMO_FALLBACK);
         setCacheStatus('local');
-        addDebug(`✅ Demo mode → avatar: ${demoAvatar}`);
+        addDebug(`✅ Demo/fallback → avatar: ${DEMO_FALLBACK}`);
         return;
       }
 
-      addDebug('⚠️ NOT demo mode → fetching from backend...');
+      addDebug('⚠️ Full mode → fetching from backend...');
       // ✅ Full Mode: Fetch from backend
       fetch(`${config.backendUrl}/api/avatars?userId=1`)
         .then(r => r.json())
@@ -2869,13 +2869,16 @@ function AvatarViewerContent() {
             const active = data.avatars.find((a: { isActive: boolean }) => a.isActive) || data.avatars[0];
             const url = active.localGlbPath || active.glbUrl || '';
             if (url) { setAvatarUrl(url); setCacheStatus('local'); addDebug(`✅ Backend avatar: ${url}`); }
+            else { setAvatarUrl(DEMO_FALLBACK); setCacheStatus('local'); addDebug('⚠️ No URL in backend → fallback'); }
           } else {
-            addDebug('❌ No avatars from backend → redirect to /settings/avatar');
-            window.location.href = '/settings/avatar';
+            addDebug('⚠️ No avatars from backend → using fallback demo avatar');
+            setAvatarUrl(DEMO_FALLBACK);
+            setCacheStatus('local');
           }
         }).catch((err) => {
-          addDebug(`❌ Backend fetch error: ${err.message} → redirect to /settings/avatar`);
-          window.location.href = '/settings/avatar';
+          addDebug(`⚠️ Backend fetch error: ${err.message} → using fallback demo avatar`);
+          setAvatarUrl(DEMO_FALLBACK);
+          setCacheStatus('local');
         });
       return;
     }
