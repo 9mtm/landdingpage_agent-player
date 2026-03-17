@@ -173,10 +173,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 }
 
-export function useAuth() {
+const DEMO_FALLBACK: AuthContextType = {
+    user: null,
+    isLoading: false,
+    login: async () => {},
+    logout: async () => {},
+    updateUser: () => {},
+};
+
+export function useAuth(): AuthContextType {
     const context = useContext(AuthContext);
     if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        return DEMO_FALLBACK;
     }
     return context;
 }
