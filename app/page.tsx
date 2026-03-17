@@ -53,7 +53,7 @@ export default function Home() {
       <section className="relative w-full h-screen min-h-[600px] overflow-hidden">
         {/* Live demo iframe as background */}
         <iframe
-          src="/demo"
+          src="/demo?embed=1"
           className="absolute inset-0 w-full h-full border-0 pointer-events-none"
           title="Agent Player Live Preview"
           loading="eager"

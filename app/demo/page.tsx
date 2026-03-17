@@ -2846,6 +2846,7 @@ function AnimPanel({ gender, activeUrl, onSelect, onGenderToggle, avatarY, onAva
 // ── Main content ──────────────────────────────────────────────────────────────
 function AvatarViewerContent() {
   const searchParams = useSearchParams();
+  const isEmbed = searchParams.get('embed') === '1';
   const avatarId = searchParams.get('id') || '';
   const rawAvatarUrl = searchParams.get('url') || '';
   const worldId = searchParams.get('world') || '';  // Join World feature
@@ -3015,7 +3016,7 @@ function AvatarViewerContent() {
   const zoomRef = useRef<ZoomHandle | null>(null);
 
   // Background color — loaded from DB, saveable
-  const [bgColor, setBgColor]         = useState('#ffffff');
+  const [bgColor, setBgColor]         = useState('#0f172a');
   const [bgSaved, setBgSaved]         = useState(false);
   const [bgScene, setBgScene]         = useState<AvatarScene>('none');
   const bgSaveTimer                   = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -4361,7 +4362,8 @@ function AvatarViewerContent() {
 
   return (
     <div className="h-screen bg-gray-900 flex flex-col select-none">
-      {/* ── Header ── */}
+      {/* ── Header (hidden in embed mode) ── */}
+      {!isEmbed && (
       <header className="bg-gray-800/80 backdrop-blur text-white px-5 py-3 flex items-center gap-3 border-b border-gray-700 z-10">
         <div className="flex-1" />
         <button onClick={toggleMute} className="p-2 hover:bg-gray-700 rounded-lg transition-colors" title={isMuted ? 'Unmute' : 'Mute'}>
@@ -4425,12 +4427,13 @@ function AvatarViewerContent() {
           </button>
         )}
       </header>
+      )}
 
       {/* ── Body ── */}
       <div className="flex-1 flex overflow-hidden">
 
         {/* ── Left sidebar — chat + agent selector ── */}
-        {showChat && (
+        {!isEmbed && showChat && (
           <aside
             className="flex-shrink-0 bg-gray-800/95 border-r border-gray-700 flex flex-col overflow-hidden z-10 relative"
             style={{ width: sidebarWidth }}
@@ -4563,7 +4566,7 @@ function AvatarViewerContent() {
           {fxState.vignette.on && <VignettePulseEffect color={fxState.vignette.color} pulseSpeed={fxState.vignette.pulseSpeed} opacity={fxState.vignette.opacity} />}
           {fxState.confetti && <ConfettiEffect onDone={() => handleFxChange('confetti', false)} />}
 
-          <NotifStack notifs={notifs} onDismiss={dismissNotif} onApprove={approveNotif} onUpdate={updateNotif} onAiReply={handleAiReply} />
+          {!isEmbed && <NotifStack notifs={notifs} onDismiss={dismissNotif} onApprove={approveNotif} onUpdate={updateNotif} onAiReply={handleAiReply} />}
           <UIOverlayStack items={uiOverlays} onDismiss={dismissUiOverlay} />
           {spotifyOpen && spotifyEmbed && (
             <SpotifyOverlay embedUrl={spotifyEmbed} onClose={() => setSpotifyOpen(false)} />
@@ -4604,9 +4607,11 @@ function AvatarViewerContent() {
           />
 
           {/* Status badge */}
+          {!isEmbed && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
             <ModeBadge mode={mode} />
           </div>
+          )}
 
           {/* Webcam PiP overlay */}
           {cameraOn && (
@@ -4753,7 +4758,7 @@ function AvatarViewerContent() {
           )}
 
           {/* Zoom buttons — bottom-left */}
-          <div className="absolute bottom-4 left-4 z-10 flex flex-col gap-1">
+          {!isEmbed && <div className="absolute bottom-4 left-4 z-10 flex flex-col gap-1">
             <button
               onClick={() => zoomRef.current?.zoomIn()}
               className="w-9 h-9 flex items-center justify-center bg-gray-800/80 hover:bg-gray-700 text-white rounded-lg border border-gray-600 transition-colors"
@@ -4768,7 +4773,7 @@ function AvatarViewerContent() {
             >
               <ZoomOut className="w-4 h-4" />
             </button>
-          </div>
+          </div>}
 
 
           </div>{/* end main avatar slot */}
@@ -4809,7 +4814,7 @@ function AvatarViewerContent() {
         </div>
 
         {/* Animation panel */}
-        {showAnimPanel && (
+        {!isEmbed && showAnimPanel && (
           <AnimPanel
             gender={gender}
             activeUrl={animUrl}
@@ -4928,7 +4933,7 @@ function AvatarViewerContent() {
         playsInline
         autoPlay
       />
-      <AvatarStatsBar avatarY={avatarY} bgColor={bgColor} gender={gender} showShadow={showShadow} zoomRef={zoomRef} />
+      {!isEmbed && <AvatarStatsBar avatarY={avatarY} bgColor={bgColor} gender={gender} showShadow={showShadow} zoomRef={zoomRef} />}
     </div>
   );
 }
