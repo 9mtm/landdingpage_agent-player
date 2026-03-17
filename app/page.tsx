@@ -700,6 +700,12 @@ export default function Home() {
                 Documentation
               </a>
               <a
+                href="/use-cases"
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                Use Cases
+              </a>
+              <a
                 href="/changelog"
                 className="text-slate-400 hover:text-white transition-colors"
               >
