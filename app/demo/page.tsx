@@ -539,17 +539,26 @@ function MatrixRain({ speed = 45, opacity = 1, density = 13 }: MatrixRainProps) 
     let drops = Array(cols).fill(0).map(() => Math.random() * -50);
 
     const draw = () => {
-      ctx.fillStyle = 'rgba(0,0,0,0.04)';
+      ctx.fillStyle = 'rgba(0,0,0,0.92)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       cols = Math.floor(canvas.width / density);
       if (drops.length !== cols) drops = Array(cols).fill(0);
       drops.forEach((y, x) => {
         const c = chars[Math.floor(Math.random() * chars.length)];
+        // Bright head character
         ctx.fillStyle = '#aaffaa';
         ctx.font = `bold ${density}px monospace`;
         ctx.fillText(c, x * density, y * density);
-        ctx.fillStyle = '#00bb33';
-        ctx.font = `${density}px monospace`;
+        // Trail characters
+        for (let t = 1; t < 20; t++) {
+          const trailY = (y - t) * density;
+          if (trailY < 0) continue;
+          const trailChar = chars[Math.floor(Math.random() * chars.length)];
+          const alpha = Math.max(0, 1 - t / 20);
+          ctx.fillStyle = `rgba(0,187,51,${alpha})`;
+          ctx.font = `${density}px monospace`;
+          ctx.fillText(trailChar, x * density, trailY);
+        }
         if (y * density > canvas.height && Math.random() > 0.975) drops[x] = 0;
         else drops[x] += 1;
       });
@@ -563,7 +572,7 @@ function MatrixRain({ speed = 45, opacity = 1, density = 13 }: MatrixRainProps) 
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 1, opacity }}
+      style={{ zIndex: 10, opacity, backgroundColor: '#000' }}
     />
   );
 }
@@ -3179,7 +3188,7 @@ function AvatarViewerContent() {
   // ── Visual FX state ──────────────────────────────────────────────────────
   const [matrixOn, setMatrixOn]           = useState(false);
   const [matrixSpeed, setMatrixSpeed]     = useState(45);
-  const [matrixOpacity, setMatrixOpacity] = useState(1);
+  const [matrixOpacity, setMatrixOpacity] = useState(0.4);
   const [matrixDensity, setMatrixDensity] = useState(13);
   const [fxState, setFxState]             = useState<FxState>(FX_DEFAULTS);
   const handleFxChange = (key: keyof FxState, val: FxState[keyof FxState]) => setFxState(prev => ({ ...prev, [key]: val }));
