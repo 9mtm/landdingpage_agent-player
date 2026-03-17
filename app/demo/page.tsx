@@ -3007,13 +3007,13 @@ function AvatarViewerContent() {
   const zoomRef = useRef<ZoomHandle | null>(null);
 
   // Background color — loaded from DB, saveable
-  const [bgColor, setBgColor]         = useState('#09090b');
+  const [bgColor, setBgColor]         = useState('#ffffff');
   const [bgSaved, setBgSaved]         = useState(false);
   const [bgScene, setBgScene]         = useState<AvatarScene>('none');
   const bgSaveTimer                   = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Shadow visibility
-  const [showShadow, setShowShadow] = useState(true);
+  const [showShadow, setShowShadow] = useState(false);
 
   // Custom animations (Mixamo FBX / GLB uploads)
   const [customAnims, setCustomAnims] = useState<Array<{
