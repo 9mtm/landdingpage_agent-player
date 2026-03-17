@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
-  GitCommit, Calendar, ArrowLeft, Loader2, RefreshCw,
+  GitCommit, Calendar, ArrowLeft, Loader2, RefreshCw, Users,
   Tag, Code2, Zap, Shield, Brain, Bell, Phone, Monitor, Package
 } from 'lucide-react';
 
@@ -17,6 +17,13 @@ interface Commit {
     };
   };
   html_url: string;
+}
+
+interface Contributor {
+  login: string;
+  avatar_url: string;
+  html_url: string;
+  contributions: number;
 }
 
 // Categorize commits by keywords in the message
@@ -65,8 +72,19 @@ function formatDate(dateStr: string): string {
 
 export default function ChangelogPage() {
   const [commits, setCommits] = useState<Commit[]>([]);
+  const [contributors, setContributors] = useState<Contributor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const fetchContributors = async () => {
+    try {
+      const res = await fetch('https://api.github.com/repos/9mtm/Agent-Player/contributors?per_page=50');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) setContributors(data);
+      }
+    } catch { /* silent */ }
+  };
 
   const fetchCommits = async () => {
     setLoading(true);
@@ -105,7 +123,7 @@ export default function ChangelogPage() {
     }
   };
 
-  useEffect(() => { fetchCommits(); }, []);
+  useEffect(() => { fetchCommits(); fetchContributors(); }, []);
 
   const grouped = groupByDate(commits);
   const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
@@ -130,110 +148,156 @@ export default function ChangelogPage() {
       </nav>
 
       <div className="pt-28 pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-purple/10 border border-brand-purple/20 mb-6">
-              <GitCommit className="w-4 h-4 text-brand-purple" />
-              <span className="text-sm text-brand-purple-light">Live from GitHub</span>
-            </div>
-            <h1 className="text-5xl font-bold mb-4">Changelog</h1>
-            <p className="text-xl text-slate-400 mb-6">
-              All updates and improvements pulled directly from our GitHub repository.
-            </p>
-            <div className="flex items-center justify-center gap-3 text-sm text-slate-500">
-              <span>{commits.length} commits</span>
-              <span className="text-slate-700">|</span>
-              <span>{sortedDates.length} days of development</span>
-              <span className="text-slate-700">|</span>
-              <button
-                onClick={fetchCommits}
-                className="inline-flex items-center gap-1 text-brand-purple hover:text-brand-purple-light transition-colors"
-              >
-                <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-            </div>
+        {/* Header */}
+        <div className="text-center mb-16 max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-purple/10 border border-brand-purple/20 mb-6">
+            <GitCommit className="w-4 h-4 text-brand-purple" />
+            <span className="text-sm text-brand-purple-light">Live from GitHub</span>
           </div>
+          <h1 className="text-5xl font-bold mb-4">Changelog</h1>
+          <p className="text-xl text-slate-400 mb-6">
+            All updates and improvements pulled directly from our GitHub repository.
+          </p>
+          <div className="flex items-center justify-center gap-3 text-sm text-slate-500">
+            <span>{commits.length} commits</span>
+            <span className="text-slate-700">|</span>
+            <button
+              onClick={fetchCommits}
+              className="inline-flex items-center gap-1 text-brand-purple hover:text-brand-purple-light transition-colors"
+            >
+              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
+        </div>
 
-          {/* Loading */}
-          {loading && (
-            <div className="flex flex-col items-center gap-4 py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-brand-purple" />
-              <p className="text-slate-400">Loading changelog from GitHub...</p>
-            </div>
-          )}
+        <div className="max-w-6xl mx-auto flex gap-8">
+          {/* Main content */}
+          <div className="flex-1 min-w-0">
+            {/* Loading */}
+            {loading && (
+              <div className="flex flex-col items-center gap-4 py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-brand-purple" />
+                <p className="text-slate-400">Loading changelog from GitHub...</p>
+              </div>
+            )}
 
-          {/* Error */}
-          {error && (
-            <div className="text-center py-20">
-              <p className="text-red-400 mb-4">{error}</p>
-              <button
-                onClick={fetchCommits}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
+            {/* Error */}
+            {error && (
+              <div className="text-center py-20">
+                <p className="text-red-400 mb-4">{error}</p>
+                <button
+                  onClick={fetchCommits}
+                  className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
 
-          {/* Timeline */}
-          {!loading && !error && (
-            <div className="relative">
-              {/* Vertical line */}
-              <div className="absolute left-[19px] top-0 bottom-0 w-px bg-slate-800" />
+            {/* Timeline */}
+            {!loading && !error && (
+              <div className="relative">
+                {/* Vertical line */}
+                <div className="absolute left-[19px] top-0 bottom-0 w-px bg-slate-800" />
 
-              {sortedDates.map((date) => (
-                <div key={date} className="mb-12">
-                  {/* Date header */}
-                  <div className="flex items-center gap-3 mb-6 relative">
-                    <div className="w-10 h-10 rounded-full bg-brand-purple/20 border-2 border-brand-purple flex items-center justify-center z-10">
-                      <Calendar className="w-4 h-4 text-brand-purple" />
+                {sortedDates.map((date) => (
+                  <div key={date} className="mb-12">
+                    {/* Date header */}
+                    <div className="flex items-center gap-3 mb-6 relative">
+                      <div className="w-10 h-10 rounded-full bg-brand-purple/20 border-2 border-brand-purple flex items-center justify-center z-10">
+                        <Calendar className="w-4 h-4 text-brand-purple" />
+                      </div>
+                      <h2 className="text-lg font-bold">{formatDate(date)}</h2>
+                      <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">
+                        {grouped[date].length} commit{grouped[date].length > 1 ? 's' : ''}
+                      </span>
                     </div>
-                    <h2 className="text-lg font-bold">{formatDate(date)}</h2>
-                    <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">
-                      {grouped[date].length} commit{grouped[date].length > 1 ? 's' : ''}
-                    </span>
-                  </div>
 
-                  {/* Commits for this date */}
-                  <div className="ml-[19px] pl-8 space-y-3">
-                    {grouped[date].map((commit) => {
-                      const firstLine = commit.commit.message.split('\n')[0];
-                      const cat = categorize(firstLine);
-                      return (
-                        <a
-                          key={commit.sha}
-                          href={commit.html_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 hover:bg-slate-900 transition-all group"
-                        >
-                          <div className="flex items-start gap-3">
-                            {/* Category badge */}
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border shrink-0 ${cat.color}`}>
-                              {cat.icon}
-                              {cat.label}
-                            </span>
-                            {/* Message */}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-slate-200 group-hover:text-white transition-colors leading-relaxed">
-                                {firstLine}
-                              </p>
-                              <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
-                                <span className="font-mono">{commit.sha.slice(0, 7)}</span>
-                                <span>{commit.commit.author.name}</span>
+                    {/* Commits for this date */}
+                    <div className="ml-[19px] pl-8 space-y-3">
+                      {grouped[date].map((commit) => {
+                        const firstLine = commit.commit.message.split('\n')[0];
+                        const cat = categorize(firstLine);
+                        return (
+                          <a
+                            key={commit.sha}
+                            href={commit.html_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 hover:bg-slate-900 transition-all group"
+                          >
+                            <div className="flex items-start gap-3">
+                              {/* Category badge */}
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border shrink-0 ${cat.color}`}>
+                                {cat.icon}
+                                {cat.label}
+                              </span>
+                              {/* Message */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-slate-200 group-hover:text-white transition-colors leading-relaxed">
+                                  {firstLine}
+                                </p>
+                                <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                                  <span className="font-mono">{commit.sha.slice(0, 7)}</span>
+                                  <span>{commit.commit.author.name}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </a>
-                      );
-                    })}
+                          </a>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar — Contributors */}
+          <aside className="hidden lg:block w-72 shrink-0">
+            <div className="sticky top-24 rounded-xl bg-slate-900/50 border border-slate-800 p-5">
+              <h3 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Contributors
+                {contributors.length > 0 && (
+                  <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">
+                    {contributors.length}
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-3">
+                {contributors.map((c) => (
+                  <a
+                    key={c.login}
+                    href={c.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 group"
+                  >
+                    <img
+                      src={c.avatar_url}
+                      alt={c.login}
+                      width={36}
+                      height={36}
+                      className="rounded-full ring-2 ring-slate-700 group-hover:ring-brand-purple transition-all"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors truncate">
+                        {c.login}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {c.contributions} commit{c.contributions !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+                {contributors.length === 0 && !loading && (
+                  <p className="text-xs text-slate-500">Loading...</p>
+                )}
+              </div>
             </div>
-          )}
+          </aside>
         </div>
       </div>
     </main>
