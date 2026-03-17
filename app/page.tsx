@@ -4,7 +4,8 @@ import { useState } from 'react';
 import {
   Github, Star, Book, Code2, Bell, Cloud, Sparkles, ArrowRight, Check,
   MessageCircle, Phone, Mail, Search, Users, Calendar, Server, BarChart3, Shield, MessagesSquare,
-  Globe, MousePointer, Brain, Monitor, HardDrive, Volume2, Mic, Video, Key, Terminal, Puzzle
+  Globe, MousePointer, Brain, Monitor, HardDrive, Volume2, Mic, Video, Key, Terminal, Puzzle,
+  Upload, Link, UserCircle
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -238,6 +239,92 @@ export default function Home() {
                 </li>
               </ul>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Avatar Sources */}
+      <section className="py-20 px-6 bg-slate-950/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-indigo/10 border border-brand-indigo/20 mb-6">
+              <UserCircle className="w-4 h-4 text-brand-indigo" />
+              <span className="text-sm text-brand-indigo">Bring Your Own Avatar</span>
+            </div>
+            <h2 className="text-4xl font-bold mb-4">Choose Your 3D Avatar</h2>
+            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+              Paste a URL or upload a file — your avatar loads automatically.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Ready Player Me */}
+            <a href="https://readyplayer.me" target="_blank" rel="nofollow noopener noreferrer" className="relative p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 hover:border-brand-purple/50 transition-all group block">
+              <div className="w-14 h-14 rounded-2xl bg-brand-purple/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <svg viewBox="0 0 24 24" className="w-7 h-7 text-brand-purple" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                  <path d="M15 3a3 3 0 0 1 0 6" strokeOpacity="0.5" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-3">Ready Player Me</h3>
+              <p className="text-slate-400 mb-6">
+                Create your personalized avatar with Ready Player Me&apos;s editor, then paste the .glb URL directly.
+              </p>
+              <div className="flex items-center gap-2 text-sm text-brand-purple-light">
+                <Link className="w-4 h-4" />
+                <span>readyplayer.me</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <div className="absolute top-4 right-4 px-2 py-1 rounded-md bg-brand-purple/10 text-[10px] uppercase tracking-wider font-semibold text-brand-purple">
+                Popular
+              </div>
+            </a>
+
+            {/* Mixamo */}
+            <a href="https://www.mixamo.com" target="_blank" rel="nofollow noopener noreferrer" className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 hover:border-brand-cyan/50 transition-all group block">
+              <div className="w-14 h-14 rounded-2xl bg-brand-cyan/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <svg viewBox="0 0 24 24" className="w-7 h-7 text-brand-cyan" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-3">Mixamo</h3>
+              <p className="text-slate-400 mb-6">
+                Download rigged & animated characters from Adobe Mixamo in FBX or GLB format and upload them.
+              </p>
+              <div className="flex items-center gap-2 text-sm text-brand-cyan">
+                <Link className="w-4 h-4" />
+                <span>mixamo.com</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </a>
+
+            {/* Custom Upload */}
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 hover:border-brand-teal/50 transition-all group">
+              <div className="w-14 h-14 rounded-2xl bg-brand-teal/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Upload className="w-7 h-7 text-brand-teal" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3">Custom Upload</h3>
+              <p className="text-slate-400 mb-6">
+                Use any 3D character — VRoid, Blender, or any tool. Just drag & drop your .glb / .vrm file.
+              </p>
+              <div className="flex items-center gap-2 text-sm text-brand-teal">
+                <Upload className="w-4 h-4" />
+                <span>Drag & drop .glb / .vrm</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Supported formats bar */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            {['GLB', 'GLTF', 'FBX', 'VRM'].map((fmt) => (
+              <span key={fmt} className="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs font-mono text-slate-400">
+                .{fmt.toLowerCase()}
+              </span>
+            ))}
+            <span className="text-xs text-slate-500 ml-2">Supported formats</span>
           </div>
         </div>
       </section>
