@@ -7,7 +7,7 @@ export const config = {
   /**
    * Demo Mode - Landing page works standalone without backend
    */
-  isDemoMode: process.env.NEXT_PUBLIC_DEMO_MODE === 'true',
+  isDemoMode: process.env.NEXT_PUBLIC_DEMO_MODE?.trim() === 'true',
 
   /**
    * Backend API URL - configured via NEXT_PUBLIC_BACKEND_URL in .env

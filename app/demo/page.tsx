@@ -1975,7 +1975,7 @@ function AnimPanel({ gender, activeUrl, onSelect, onGenderToggle, avatarY, onAva
         <div className="flex-1 overflow-y-auto flex flex-col">
         <div className="flex-1 p-2 space-y-3 overflow-y-auto">
           {/* ✅ Avatar Selection (Demo Mode Only) */}
-          {config.isDemoMode && (
+          {true && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs text-gray-500 font-semibold flex items-center gap-1">
@@ -2957,20 +2957,19 @@ function AvatarViewerContent() {
   const sidebarDragRef = useRef<{ startX: number; startW: number } | null>(null);
   const [vadEnabled, setVadEnabled]   = useState(false);
   const { devMode, toggle: toggleDevMode, setDevMode } = useDeveloperMode();
-  // ✅ In Demo Mode: Show panel by default
-  const [showAnimPanel, setShowAnimPanel] = useState(config.isDemoMode);
+  // ✅ /demo page is ALWAYS in demo mode regardless of env var
+  const isDemo = true;
+  const [showAnimPanel, setShowAnimPanel] = useState(true);
 
   // ✅ Auto-enable Developer Mode + Show Panel in Demo Mode (on mount only)
   useEffect(() => {
-    if (config.isDemoMode) {
-      if (!devMode) setDevMode(true);
-      if (!showAnimPanel) setShowAnimPanel(true);
-    }
+    if (!devMode) setDevMode(true);
+    if (!showAnimPanel) setShowAnimPanel(true);
   }, []); // Run only once on mount
 
   // Force-hide panel when dev mode is turned off (only in Full Mode)
   useEffect(() => {
-    if (!config.isDemoMode && !devMode) setShowAnimPanel(false);
+    if (!isDemo && !devMode) setShowAnimPanel(false);
   }, [devMode]);
 
   // Agent selector
@@ -4354,7 +4353,7 @@ function AvatarViewerContent() {
           </button>
         )}
         {/* Avatar Settings - Only show in Full Mode */}
-        {!config.isDemoMode && (
+        {false && (
           <a href="/settings/avatar" className="p-2 hover:bg-gray-700 rounded-lg transition-colors text-gray-300" title="Avatar Settings">
             <Settings className="w-4 h-4" />
           </a>
