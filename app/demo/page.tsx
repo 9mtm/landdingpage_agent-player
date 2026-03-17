@@ -2843,8 +2843,12 @@ function AvatarViewerContent() {
   // Start empty — set to local cache if available, else CDN. Avoids double-load.
   const [avatarUrl, setAvatarUrl] = useState('');
   const [cacheStatus, setCacheStatus] = useState<'checking' | 'local' | 'cdn'>('checking');
+  const [debugLog, setDebugLog] = useState<string[]>([]);
+  const addDebug = (msg: string) => { console.log('[DEBUG]', msg); setDebugLog(prev => [...prev, `${new Date().toISOString().slice(11,19)} ${msg}`]); };
 
   useEffect(() => {
+    addDebug(`isDemoMode=${config.isDemoMode}, avatarId="${avatarId}", rawUrl="${rawAvatarUrl}"`);
+    addDebug(`NEXT_PUBLIC_DEMO_MODE="${process.env.NEXT_PUBLIC_DEMO_MODE}"`);
     // If neither ?id= nor ?url= are provided, auto-load the active avatar
     if (!avatarId && !rawAvatarUrl) {
       // ✅ Demo Mode: Use local demo avatars
@@ -2852,10 +2856,11 @@ function AvatarViewerContent() {
         const demoAvatar = '/avatars/demo-avatar-male.glb';
         setAvatarUrl(demoAvatar);
         setCacheStatus('local');
-        console.log('[Demo] Using demo avatar:', demoAvatar);
+        addDebug(`✅ Demo mode → avatar: ${demoAvatar}`);
         return;
       }
 
+      addDebug('⚠️ NOT demo mode → fetching from backend...');
       // ✅ Full Mode: Fetch from backend
       fetch(`${config.backendUrl}/api/avatars?userId=1`)
         .then(r => r.json())
@@ -2863,13 +2868,13 @@ function AvatarViewerContent() {
           if (data.success && data.avatars?.length) {
             const active = data.avatars.find((a: { isActive: boolean }) => a.isActive) || data.avatars[0];
             const url = active.localGlbPath || active.glbUrl || '';
-            if (url) { setAvatarUrl(url); setCacheStatus('local'); }
+            if (url) { setAvatarUrl(url); setCacheStatus('local'); addDebug(`✅ Backend avatar: ${url}`); }
           } else {
-            // No avatars — redirect to settings to create one
+            addDebug('❌ No avatars from backend → redirect to /settings/avatar');
             window.location.href = '/settings/avatar';
           }
-        }).catch(() => {
-          // On error also redirect to settings
+        }).catch((err) => {
+          addDebug(`❌ Backend fetch error: ${err.message} → redirect to /settings/avatar`);
           window.location.href = '/settings/avatar';
         });
       return;
@@ -4888,6 +4893,28 @@ function AvatarViewerContent() {
         playsInline
         autoPlay
       />
+      <DebugPanel log={debugLog} avatarUrl={avatarUrl} cacheStatus={cacheStatus} />
+    </div>
+  );
+}
+
+// ── Debug Panel (temporary) ───────────────────────────────────────────────────
+function DebugPanel({ log, avatarUrl, cacheStatus }: { log: string[]; avatarUrl: string; cacheStatus: string }) {
+  const [show, setShow] = useState(true);
+  if (!show) return <button onClick={() => setShow(true)} className="fixed bottom-2 right-2 z-[9999] bg-red-600 text-white text-xs px-2 py-1 rounded">DBG</button>;
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-black/90 text-green-400 text-xs font-mono p-3 max-h-48 overflow-y-auto border-t border-green-600">
+      <div className="flex justify-between mb-1">
+        <span className="text-yellow-400 font-bold">🔍 DEBUG PANEL</span>
+        <button onClick={() => setShow(false)} className="text-red-400">✕</button>
+      </div>
+      <div>avatarUrl: <span className="text-white">{avatarUrl || '(empty)'}</span></div>
+      <div>cacheStatus: <span className="text-white">{cacheStatus}</span></div>
+      <div>isDemoMode: <span className="text-white">{String(config.isDemoMode)}</span></div>
+      <div>NEXT_PUBLIC_DEMO_MODE: <span className="text-white">{String(process.env.NEXT_PUBLIC_DEMO_MODE)}</span></div>
+      <div className="mt-1 border-t border-green-800 pt-1">
+        {log.map((l, i) => <div key={i}>{l}</div>)}
+      </div>
     </div>
   );
 }
