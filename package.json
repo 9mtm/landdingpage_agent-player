@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3002",
+    "dev": "next dev --port 58391",
+    "kill": "for /f \"tokens=5\" %a in ('netstat -aon ^| findstr \":58391 \" ^| findstr \"LISTENING\"') do taskkill /F /PID %a",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
