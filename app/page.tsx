@@ -49,94 +49,108 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-4xl mx-auto">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-purple/10 border border-brand-purple/20 mb-8">
-              <Sparkles className="w-4 h-4 text-brand-purple" />
-              <span className="text-sm text-brand-purple-light">100% Free • Open Source • Self-Hosted</span>
-            </div>
+      {/* Immersive Hero — Live Demo Preview */}
+      <section className="relative w-full h-screen min-h-[600px] overflow-hidden">
+        {/* Live demo iframe as background */}
+        <iframe
+          src="/demo"
+          className="absolute inset-0 w-full h-full border-0 pointer-events-none"
+          title="Agent Player Live Preview"
+          loading="eager"
+        />
 
-            {/* Headline */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              The AI Agent Framework
-              <br />
-              <span className="gradient-text">with 3D Avatars</span>
-            </h1>
+        {/* Thin top gradient for nav only */}
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-slate-950/80 to-transparent pointer-events-none z-[1]" />
+        {/* Subtle bottom fade */}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none z-[1]" />
 
-            {/* Subheadline */}
-            <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Build intelligent AI agents with interactive 3D avatars, dynamic UI generation,
-              and live notifications. Everything you need in one powerful open-source framework.
-            </p>
+        {/* Single CTA button centered */}
+        <div className="absolute inset-0 z-10 flex items-end justify-center pb-20">
+          <a
+            href="/demo"
+            className="group px-12 py-6 rounded-2xl bg-hero-gradient hover:opacity-90 transition-all flex items-center gap-3 font-bold text-2xl shadow-2xl glow-purple"
+          >
+            <Sparkles className="w-7 h-7" />
+            Try Live Demo
+            <ArrowRight className="w-7 h-7 group-hover:translate-x-1 transition-transform" />
+          </a>
+        </div>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a
-                href="/demo"
-                className="group px-8 py-4 rounded-xl bg-hero-gradient hover:opacity-90 transition-opacity flex items-center gap-2 font-semibold text-lg shadow-lg glow-purple"
-              >
-                <Sparkles className="w-5 h-5" />
-                Try Live Demo
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </a>
-              <a
-                href="https://github.com/9mtm/Agent-Player"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-2 font-semibold text-lg border border-slate-700"
-              >
-                <Star className="w-5 h-5" />
-                Star on GitHub
-              </a>
-              <a
-                href="https://github.com/9mtm/Agent-Player#readme"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-2 font-semibold text-lg border border-slate-700"
-              >
-                <Book className="w-5 h-5" />
-                Documentation
-              </a>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto mt-16 pt-16 border-t border-slate-800">
-              <div>
-                <div className="text-3xl font-bold text-brand-cyan">70+</div>
-                <div className="text-sm text-slate-400 mt-1">UI Components</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-brand-purple">13</div>
-                <div className="text-sm text-slate-400 mt-1">Extensions</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-brand-indigo">26</div>
-                <div className="text-sm text-slate-400 mt-1">Built-in Tools</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-brand-teal">27</div>
-                <div className="text-sm text-slate-400 mt-1">Notification Types</div>
-              </div>
-            </div>
+        {/* Scroll indicator */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 animate-bounce opacity-40">
+          <div className="w-5 h-8 rounded-full border-2 border-white/20 flex items-start justify-center p-1">
+            <div className="w-1 h-2 rounded-full bg-white/40" />
           </div>
         </div>
       </section>
 
-      {/* Screenshot Hero */}
-      <section className="pb-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-2xl glow-cyan">
-            <Image
-              src="/images/avatar-viewer.png"
-              alt="Agent Player Avatar Viewer"
-              width={1200}
-              height={675}
-              className="w-full h-auto"
-              priority
-            />
+      {/* Info Section — Title, Description, Stats, Links */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-purple/10 border border-brand-purple/20 mb-8">
+            <Sparkles className="w-4 h-4 text-brand-purple" />
+            <span className="text-sm text-brand-purple-light">100% Free • Open Source • Self-Hosted</span>
+          </div>
+
+          {/* Headline */}
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            The AI Agent Framework
+            <br />
+            <span className="gradient-text">with 3D Avatars</span>
+          </h1>
+
+          {/* Subheadline */}
+          <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Build intelligent AI agents with interactive 3D avatars, dynamic UI generation,
+            and live notifications. Everything you need in one powerful open-source framework.
+          </p>
+
+          {/* Links */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <a
+              href="https://github.com/9mtm/Agent-Player"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-2 font-semibold text-lg border border-slate-700"
+            >
+              <Star className="w-5 h-5" />
+              Star on GitHub
+              {stars && (
+                <span className="flex items-center gap-1 text-sm text-slate-400">
+                  ({stars})
+                </span>
+              )}
+            </a>
+            <a
+              href="https://github.com/9mtm/Agent-Player#readme"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-2 font-semibold text-lg border border-slate-700"
+            >
+              <Book className="w-5 h-5" />
+              Documentation
+            </a>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto pt-12 border-t border-slate-800">
+            <div>
+              <div className="text-3xl font-bold text-brand-cyan">70+</div>
+              <div className="text-sm text-slate-400 mt-1">UI Components</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-brand-purple">13</div>
+              <div className="text-sm text-slate-400 mt-1">Extensions</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-brand-indigo">26</div>
+              <div className="text-sm text-slate-400 mt-1">Built-in Tools</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-brand-teal">27</div>
+              <div className="text-sm text-slate-400 mt-1">Notification Types</div>
+            </div>
           </div>
         </div>
       </section>

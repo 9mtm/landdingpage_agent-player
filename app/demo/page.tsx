@@ -3849,6 +3849,31 @@ function AvatarViewerContent() {
     setAnimUrl(gender === 'male' ? CDN_MALE_IDLE : CDN_FEMALE_IDLE);
   }, [gender]);
 
+  // Auto-play intro animation sequence on first load
+  const introPlayedRef = useRef(false);
+  useEffect(() => {
+    if (introPlayedRef.current) return;
+    introPlayedRef.current = true;
+
+    const introSequence = ['expr_wave', 'expr_happy', 'expr_confident'];
+    let i = 0;
+    const playNext = () => {
+      if (i < introSequence.length) {
+        const url = resolveAnimUrl(introSequence[i], gender);
+        if (url) setAnimUrl(url);
+        i++;
+        setTimeout(playNext, 3000); // 3s per animation
+      } else {
+        // Return to idle
+        setAnimUrl(gender === 'male' ? CDN_MALE_IDLE : CDN_FEMALE_IDLE);
+      }
+    };
+    // Start after 1s delay for model to load
+    const t = setTimeout(playNext, 1000);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Show contextual animation based on mode
   useEffect(() => {
     if (mode === 'processing') {
