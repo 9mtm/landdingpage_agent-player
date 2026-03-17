@@ -2852,8 +2852,7 @@ function AvatarViewerContent() {
   // Start empty — set to local cache if available, else CDN. Avoids double-load.
   const [avatarUrl, setAvatarUrl] = useState('');
   const [cacheStatus, setCacheStatus] = useState<'checking' | 'local' | 'cdn'>('checking');
-  const [debugLog, setDebugLog] = useState<string[]>([]);
-  const addDebug = (msg: string) => { console.log('[DEBUG]', msg); setDebugLog(prev => [...prev, `${new Date().toISOString().slice(11,19)} ${msg}`]); };
+  const addDebug = (msg: string) => { console.log('[DEBUG]', msg); };
 
   useEffect(() => {
     const DEMO_FALLBACK = '/avatars/demo-avatar-male.glb';
@@ -4904,28 +4903,38 @@ function AvatarViewerContent() {
         playsInline
         autoPlay
       />
-      <DebugPanel log={debugLog} avatarUrl={avatarUrl} cacheStatus={cacheStatus} />
+      <AvatarStatsBar avatarY={avatarY} bgColor={bgColor} gender={gender} showShadow={showShadow} zoomRef={zoomRef} />
     </div>
   );
 }
 
-// ── Debug Panel (temporary) ───────────────────────────────────────────────────
-function DebugPanel({ log, avatarUrl, cacheStatus }: { log: string[]; avatarUrl: string; cacheStatus: string }) {
-  const [show, setShow] = useState(true);
-  if (!show) return <button onClick={() => setShow(true)} className="fixed bottom-2 right-2 z-[9999] bg-red-600 text-white text-xs px-2 py-1 rounded">DBG</button>;
+// ── Avatar Stats Bar ─────────────────────────────────────────────────────────
+function AvatarStatsBar({ avatarY, bgColor, gender, showShadow, zoomRef }: { avatarY: number; bgColor: string; gender: string; showShadow: boolean; zoomRef: React.RefObject<ZoomHandle | null> }) {
+  const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
+  const [zoom, setZoom] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      const el = document.querySelector('canvas');
+      if (el) setContainerSize({ w: el.clientWidth, h: el.clientHeight });
+      if (zoomRef.current) setZoom(zoomRef.current.getDistance());
+    };
+    update();
+    window.addEventListener('resize', update);
+    const interval = setInterval(() => {
+      if (zoomRef.current) setZoom(zoomRef.current.getDistance());
+    }, 200);
+    return () => { window.removeEventListener('resize', update); clearInterval(interval); };
+  }, [zoomRef]);
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-black/90 text-green-400 text-xs font-mono p-3 max-h-48 overflow-y-auto border-t border-green-600">
-      <div className="flex justify-between mb-1">
-        <span className="text-yellow-400 font-bold">🔍 DEBUG PANEL</span>
-        <button onClick={() => setShow(false)} className="text-red-400">✕</button>
-      </div>
-      <div>avatarUrl: <span className="text-white">{avatarUrl || '(empty)'}</span></div>
-      <div>cacheStatus: <span className="text-white">{cacheStatus}</span></div>
-      <div>isDemoMode: <span className="text-white">{String(config.isDemoMode)}</span></div>
-      <div>NEXT_PUBLIC_DEMO_MODE: <span className="text-white">{String(process.env.NEXT_PUBLIC_DEMO_MODE)}</span></div>
-      <div className="mt-1 border-t border-green-800 pt-1">
-        {log.map((l, i) => <div key={i}>{l}</div>)}
-      </div>
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-gray-900/95 backdrop-blur text-xs font-mono px-4 py-2 border-t border-gray-700 flex items-center gap-6 text-gray-400">
+      <span>Zoom: <span className="text-white">{zoom.toFixed(2)}</span></span>
+      <span>Y: <span className="text-white">{avatarY.toFixed(1)}</span></span>
+      <span>Canvas: <span className="text-white">{containerSize.w} x {containerSize.h}</span></span>
+      <span>BG: <span className="text-white">{bgColor}</span> <span className="inline-block w-3 h-3 rounded border border-gray-600 align-middle" style={{ backgroundColor: bgColor }} /></span>
+      <span>Gender: <span className="text-white">{gender}</span></span>
+      <span>Shadow: <span className={showShadow ? 'text-green-400' : 'text-red-400'}>{showShadow ? 'ON' : 'OFF'}</span></span>
     </div>
   );
 }

@@ -574,7 +574,7 @@ function setMorph(meshes: THREE.Mesh[], name: string, value: number) {
 
 // ─── Camera presets ───────────────────────────────────────────────────────────
 const CAM_PRESETS = {
-  full: { pos: [0, 0.2, 3.0] as [number,number,number], target: [0, 0.3, 0] as [number,number,number] },
+  full: { pos: [0, 0.2, 5.0] as [number,number,number], target: [0, 0.3, 0] as [number,number,number] },
   half: { pos: [0, 0.7, 2.0] as [number,number,number], target: [0, 0.8, 0] as [number,number,number] },
   bust: { pos: [0, 1.1, 1.4] as [number,number,number], target: [0, 1.2, 0] as [number,number,number] },
   face: { pos: [0, 1.5, 0.8] as [number,number,number], target: [0, 1.5, 0] as [number,number,number] },
@@ -586,6 +586,7 @@ export interface ZoomHandle {
   zoomIn: () => void;
   zoomOut: () => void;
   setPreset: (preset: CameraPreset) => void;
+  getDistance: () => number;
 }
 
 const ZoomController = forwardRef<ZoomHandle, {}>((_, ref) => {
@@ -602,7 +603,7 @@ const ZoomController = forwardRef<ZoomHandle, {}>((_, ref) => {
       const cam = camera as THREE.PerspectiveCamera;
       const dir = cam.position.clone().sub(new THREE.Vector3(0, 0.3, 0)).normalize();
       const dist = cam.position.distanceTo(new THREE.Vector3(0, 0.3, 0));
-      if (dist < 5) cam.position.addScaledVector(dir, 0.4);
+      if (dist < 8) cam.position.addScaledVector(dir, 0.4);
     },
     setPreset: (preset: CameraPreset) => {
       const p = CAM_PRESETS[preset];
@@ -612,6 +613,9 @@ const ZoomController = forwardRef<ZoomHandle, {}>((_, ref) => {
         c.target.set(...p.target);
         c.update?.();
       }
+    },
+    getDistance: () => {
+      return camera.position.distanceTo(new THREE.Vector3(0, 0.3, 0));
     },
   }));
 
@@ -1284,7 +1288,7 @@ export function AvatarViewer({
         <BgController useHtmlBg={useHtmlBg} transparent={!!transparent} bgColor={bgColor || '#09090b'} />
         {initialPreset
           ? <PerspectiveCamera makeDefault position={CAM_PRESETS[initialPreset].pos} fov={45} />
-          : <PerspectiveCamera makeDefault position={[0, 0.2, 2.8]} fov={45} />
+          : <PerspectiveCamera makeDefault position={[0, 0.2, 5.0]} fov={45} />
         }
 
         <ambientLight intensity={0.7} />
