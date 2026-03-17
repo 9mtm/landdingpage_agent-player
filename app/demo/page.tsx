@@ -2856,7 +2856,7 @@ function AvatarViewerContent() {
   const addDebug = (msg: string) => { console.log('[DEBUG]', msg); };
 
   useEffect(() => {
-    const DEMO_FALLBACK = '/avatars/demo-avatar-male.glb';
+    const DEMO_FALLBACK = '/avatars/demo-avatar-female.glb';
     addDebug(`isDemoMode=${config.isDemoMode}, avatarId="${avatarId}", rawUrl="${rawAvatarUrl}"`);
     addDebug(`NEXT_PUBLIC_DEMO_MODE="${process.env.NEXT_PUBLIC_DEMO_MODE}"`);
     // If neither ?id= nor ?url= are provided, auto-load the active avatar
