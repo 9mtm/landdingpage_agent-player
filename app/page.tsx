@@ -5,7 +5,7 @@ import {
   Github, Star, Book, Code2, Bell, Cloud, Sparkles, ArrowRight, Check,
   MessageCircle, Phone, Mail, Search, Users, Calendar, Server, BarChart3, Shield, MessagesSquare,
   Globe, MousePointer, Brain, Monitor, HardDrive, Volume2, Mic, Video, Key, Terminal, Puzzle,
-  Upload, Link, UserCircle
+  Upload, Link, UserCircle, Zap, Layout, ChevronRight
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -137,6 +137,188 @@ export default function Home() {
               className="w-full h-auto"
               priority
             />
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works — AI Prompt System */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-purple/10 border border-brand-purple/20 mb-6">
+              <Zap className="w-4 h-4 text-brand-purple" />
+              <span className="text-sm text-brand-purple-light">Prompt-Driven System</span>
+            </div>
+            <h2 className="text-4xl font-bold mb-4">Just Chat. AI Does the Rest.</h2>
+            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+              No code needed. The AI automatically knows how to generate UI components
+              and send live notifications — all from a simple chat message.
+            </p>
+          </div>
+
+          {/* 3-Step Flow */}
+          <div className="grid md:grid-cols-3 gap-6 mb-16">
+            {/* Step 1 */}
+            <div className="relative p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700">
+              <div className="absolute -top-4 left-8 px-3 py-1 rounded-full bg-brand-purple text-white text-xs font-bold">
+                Step 1
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-brand-purple/10 flex items-center justify-center mb-5">
+                <MessageCircle className="w-6 h-6 text-brand-purple" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">You Send a Message</h3>
+              <div className="rounded-lg bg-slate-950 border border-slate-700 p-4 font-mono text-sm">
+                <span className="text-slate-500">You:</span>
+                <span className="text-slate-300 ml-2">&quot;Show me the stock price of AAPL and send a WhatsApp alert&quot;</span>
+              </div>
+            </div>
+
+            {/* Arrow */}
+            <div className="hidden md:flex items-center justify-center absolute left-1/3 top-1/2 -translate-y-1/2 z-10">
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700">
+              <div className="absolute -top-4 left-8 px-3 py-1 rounded-full bg-brand-indigo text-white text-xs font-bold">
+                Step 2
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-brand-indigo/10 flex items-center justify-center mb-5">
+                <Brain className="w-6 h-6 text-brand-indigo" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">AI Understands & Generates</h3>
+              <div className="rounded-lg bg-slate-950 border border-slate-700 p-4 font-mono text-xs space-y-2">
+                <div className="flex items-center gap-2">
+                  <Layout className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
+                  <span className="text-brand-cyan">spec</span>
+                  <span className="text-slate-500">→ Chart + Metric cards</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Bell className="w-3.5 h-3.5 text-brand-purple shrink-0" />
+                  <span className="text-brand-purple">notify</span>
+                  <span className="text-slate-500">→ WhatsApp notification</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Code2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="text-slate-400">text</span>
+                  <span className="text-slate-500">→ Natural response</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700">
+              <div className="absolute -top-4 left-8 px-3 py-1 rounded-full bg-brand-cyan text-white text-xs font-bold">
+                Step 3
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-brand-cyan/10 flex items-center justify-center mb-5">
+                <Sparkles className="w-6 h-6 text-brand-cyan" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Everything Appears Live</h3>
+              <div className="rounded-lg bg-slate-950 border border-slate-700 p-4 text-sm space-y-2">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span className="text-slate-300">Stock chart rendered on screen</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span className="text-slate-300">WhatsApp notification on avatar</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span className="text-slate-300">Avatar speaks the response</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Two columns: UI Components + Notification Types */}
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Left: UI Generation */}
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800/50 border border-slate-700">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-brand-cyan/10 flex items-center justify-center">
+                  <Layout className="w-5 h-5 text-brand-cyan" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold">AI-Generated UI</h3>
+                  <p className="text-xs text-slate-500">54+ components via prompt</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { label: 'Charts & Graphs', desc: 'Bar, Line, Pie, Area' },
+                  { label: 'Data Cards', desc: 'Metrics, KPIs, Badges' },
+                  { label: 'Tables & Lists', desc: 'Sortable, paginated data' },
+                  { label: 'Forms & Inputs', desc: 'Text, Select, Checkbox, Slider' },
+                  { label: 'Interactive', desc: 'Buttons, Toggles, Accordions' },
+                  { label: 'Advanced', desc: 'JSON Viewer, Markdown, Timeline' },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center justify-between p-3 rounded-lg bg-slate-950/50 border border-slate-800">
+                    <div className="flex items-center gap-2">
+                      <ChevronRight className="w-3.5 h-3.5 text-brand-cyan" />
+                      <span className="text-sm font-medium">{item.label}</span>
+                    </div>
+                    <span className="text-xs text-slate-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Notification Types */}
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800/50 border border-slate-700">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-brand-purple/10 flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-brand-purple" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold">Live Notifications</h3>
+                  <p className="text-xs text-slate-500">27 types on avatar screen</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { name: 'WhatsApp', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+                  { name: 'Telegram', color: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
+                  { name: 'Discord', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+                  { name: 'YouTube', color: 'bg-red-500/10 text-red-400 border-red-500/20' },
+                  { name: 'Stripe', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+                  { name: 'PayPal', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+                  { name: 'Email', color: 'bg-red-500/10 text-red-400 border-red-500/20' },
+                  { name: 'GIF', color: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
+                  { name: 'OTP Code', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+                  { name: 'Face ID', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+                  { name: 'SMS OTP', color: 'bg-violet-500/10 text-violet-400 border-violet-500/20' },
+                  { name: 'Terminal', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+                  { name: 'Twitter', color: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
+                  { name: 'TikTok', color: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
+                  { name: 'Instagram', color: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20' },
+                  { name: 'Facebook', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+                  { name: 'Twitch', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+                  { name: 'Reddit', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+                  { name: 'LinkedIn', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+                  { name: 'Snapchat', color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+                  { name: 'Calendar', color: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
+                  { name: 'Stock Alert', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+                  { name: 'Apple Pay', color: 'bg-slate-500/10 text-slate-300 border-slate-500/20' },
+                  { name: 'Bank', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+                  { name: 'Task', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+                  { name: 'Approval', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+                  { name: 'Message', color: 'bg-slate-500/10 text-slate-300 border-slate-500/20' },
+                ].map((n) => (
+                  <span key={n.name} className={`px-2.5 py-1 rounded-md border text-xs font-medium ${n.color}`}>
+                    {n.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom note */}
+          <div className="mt-10 text-center">
+            <p className="text-sm text-slate-500 max-w-2xl mx-auto">
+              The AI learns available components through an injected system prompt —
+              no configuration needed. It generates UI and notifications as part of its natural response.
+            </p>
           </div>
         </div>
       </section>
