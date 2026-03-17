@@ -31,6 +31,12 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <a
+              href="/changelog"
+              className="text-sm text-slate-400 hover:text-white transition-colors hidden sm:inline"
+            >
+              Changelog
+            </a>
+            <a
               href="https://github.com/9mtm/Agent-Player"
               target="_blank"
               rel="noopener noreferrer"
@@ -692,6 +698,12 @@ export default function Home() {
                 className="text-slate-400 hover:text-white transition-colors"
               >
                 Documentation
+              </a>
+              <a
+                href="/changelog"
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                Changelog
               </a>
               <a
                 href="https://github.com/9mtm/Agent-Player/issues"
