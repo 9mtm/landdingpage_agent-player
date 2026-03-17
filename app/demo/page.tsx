@@ -3850,27 +3850,26 @@ function AvatarViewerContent() {
     setAnimUrl(gender === 'male' ? CDN_MALE_IDLE : CDN_FEMALE_IDLE);
   }, [gender]);
 
-  // Auto-play intro animation sequence on first load
+  // Auto-play random intro animation on each page load
   const introPlayedRef = useRef(false);
   useEffect(() => {
     if (introPlayedRef.current) return;
     introPlayedRef.current = true;
 
-    const introSequence = ['expr_wave', 'expr_happy', 'expr_confident'];
-    let i = 0;
-    const playNext = () => {
-      if (i < introSequence.length) {
-        const url = resolveAnimUrl(introSequence[i], gender);
-        if (url) setAnimUrl(url);
-        i++;
-        setTimeout(playNext, 3000); // 3s per animation
-      } else {
-        // Return to idle
+    const introPool = [
+      'expr_wave', 'expr_happy', 'expr_confident', 'expr_wonder',
+      'expr_nod', 'talk_excited', 'talk_explain', 'dance_hype',
+    ];
+    const pick = introPool[Math.floor(Math.random() * introPool.length)];
+    const url = resolveAnimUrl(pick, gender);
+
+    const t = setTimeout(() => {
+      if (url) setAnimUrl(url);
+      // Return to idle after animation plays
+      setTimeout(() => {
         setAnimUrl(gender === 'male' ? CDN_MALE_IDLE : CDN_FEMALE_IDLE);
-      }
-    };
-    // Start after 1s delay for model to load
-    const t = setTimeout(playNext, 1000);
+      }, 3500);
+    }, 1000);
     return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

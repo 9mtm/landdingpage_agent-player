@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /demo?embed=1
+
+Sitemap: https://agent-player.com/sitemap.xml
