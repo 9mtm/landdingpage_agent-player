@@ -662,6 +662,8 @@ interface AvatarModelProps {
   lipsyncCues?: LipsyncCue[];
   audioEl?: HTMLAudioElement | null;
   avatarRef?: React.RefObject<THREE.Group | null>;
+  morphOverrides?: Record<string, number>;
+  materialColorOverride?: { skin?: string; hair?: string; eyes?: string };
 }
 
 /** Bridge: picks the right loader based on file extension, passes scene+anims to core */
@@ -690,7 +692,7 @@ interface AvatarModelCoreProps extends Omit<AvatarModelProps, 'url' | 'animation
   isAnimFbx?: boolean;
 }
 
-function AvatarModelCore({ loadedScene, rawAnims, isPlaying, audioAnalyser, avatarY, stripRootMotion, facialExpression, lipsyncCues, audioEl, avatarRef: externalAvatarRef, isFbx, isAnimFbx }: AvatarModelCoreProps) {
+function AvatarModelCore({ loadedScene, rawAnims, isPlaying, audioAnalyser, avatarY, stripRootMotion, facialExpression, lipsyncCues, audioEl, avatarRef: externalAvatarRef, isFbx, isAnimFbx, morphOverrides, materialColorOverride }: AvatarModelCoreProps) {
   // Compute the right display scale: FBX in centimeters needs 0.01 factor
   // Also capture FBX rest-pose hip height for proportional animation scaling
   const { primitiveScale, fbxHipRestY } = useMemo(() => {
@@ -784,6 +786,78 @@ function AvatarModelCore({ loadedScene, rawAnims, isPlaying, audioAnalyser, avat
     Object.entries(BONES).forEach(([k, name]) => {
       bones.current[k] = cloned.getObjectByName(name);
     });
+  }, [cloned]);
+
+  // ── Material color overrides (skin, hair, eyes) ─────────────────────────────
+  // Pre-cache colorable meshes when cloned changes (runs once per model load)
+  type ColorableMat = {
+    mat: THREE.MeshStandardMaterial;
+    category: 'skin' | 'hair' | 'eyes';
+    originalColor: THREE.Color;
+    originalMap: THREE.Texture | null;
+    mapRemoved: boolean;
+  };
+  const colorableMats = useRef<ColorableMat[]>([]);
+
+  useEffect(() => {
+    const result: ColorableMat[] = [];
+    cloned.traverse((child) => {
+      if (!(child as THREE.Mesh).isMesh) return;
+      const mesh = child as THREE.Mesh;
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+
+      for (let i = 0; i < materials.length; i++) {
+        const mat = materials[i] as THREE.MeshStandardMaterial;
+        if (!mat || !mat.color) continue;
+
+        const n = mesh.name.toLowerCase();
+        const mn = (mat.name || '').toLowerCase();
+
+        let cat: 'skin' | 'hair' | 'eyes' | null = null;
+        if (n.includes('head') || n.includes('body') || n.includes('skin') ||
+            mn.includes('head') || mn.includes('body') || mn.includes('skin')) {
+          cat = 'skin';
+        } else if (n.includes('hair') || mn.includes('hair')) {
+          cat = 'hair';
+        } else if ((n.includes('eye') || mn.includes('eye')) && !n.includes('brow') && !mn.includes('brow')) {
+          cat = 'eyes';
+        }
+
+        if (!cat) continue;
+
+        // Clone material for independent control (avoid mutating shared useGLTF cache)
+        const clonedMat = mat.clone();
+        if (Array.isArray(mesh.material)) {
+          mesh.material[i] = clonedMat;
+        } else {
+          mesh.material = clonedMat;
+        }
+
+        result.push({
+          mat: clonedMat,
+          category: cat,
+          originalColor: mat.color.clone(),
+          originalMap: mat.map,
+          mapRemoved: false,
+        });
+      }
+    });
+
+    if (result.length > 0) {
+      console.log('[AvatarViewer] Colorable materials:', result.map(r => `${r.mat.name || 'unnamed'} → ${r.category}`));
+    } else {
+      // Debug: show all mesh names so we can diagnose matching issues
+      const allNames: string[] = [];
+      cloned.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          allNames.push(`mesh="${mesh.name}" mats=[${mats.map(m => (m as THREE.MeshStandardMaterial).name || 'unnamed').join(',')}]`);
+        }
+      });
+      console.warn('[AvatarViewer] No colorable materials found! All meshes:', allNames);
+    }
+    colorableMats.current = result;
   }, [cloned]);
 
   // Play animation — always create fresh mixer so bone retargeting is correct
@@ -974,6 +1048,35 @@ function AvatarModelCore({ loadedScene, rawAnims, isPlaying, audioAnalyser, avat
         delta * 3
       );
     }
+
+    // ── Morph overrides from customizer (applied last, takes priority) ─────
+    if (morphOverrides && hasMorphTargets) {
+      for (const [name, value] of Object.entries(morphOverrides)) {
+        if (value > 0.001) {
+          setMorph(morphMeshes, name, value);
+        }
+      }
+    }
+
+    // ── Color overrides from customizer (applied per frame for reliability) ──
+    for (const cm of colorableMats.current) {
+      const targetColor = materialColorOverride?.[cm.category];
+      if (targetColor) {
+        cm.mat.color.set(targetColor);
+        if (!cm.mapRemoved) {
+          // Remove texture map once so flat color shows (texture overrides color)
+          cm.mat.map = null;
+          cm.mat.needsUpdate = true;
+          cm.mapRemoved = true;
+        }
+      } else if (cm.mapRemoved) {
+        // Restore original when override is cleared for this category
+        cm.mat.color.copy(cm.originalColor);
+        cm.mat.map = cm.originalMap;
+        cm.mat.needsUpdate = true;
+        cm.mapRemoved = false;
+      }
+    }
   });
 
   return (
@@ -1079,6 +1182,10 @@ export interface AvatarViewerProps {
     agent_name?: string;
     agent_avatar_url?: string;
   }>;
+  /** Morph target overrides from avatar customizer (takes priority over idle animations) */
+  morphOverrides?: Record<string, number>;
+  /** Material color overrides for skin, hair, eyes */
+  materialColorOverride?: { skin?: string; hair?: string; eyes?: string };
 }
 
 // Reactively controls canvas transparency & scene background
@@ -1120,6 +1227,8 @@ export function AvatarViewer({
   youtubeNoCookie = false,
   showShadow = true,
   worldBots = [],
+  morphOverrides,
+  materialColorOverride,
 }: AvatarViewerProps) {
   const [audioAnalyser, setAudioAnalyser] = useState<AnalyserNode | null>(null);
   const [loadError, setLoadError]         = useState<string | null>(null);
@@ -1318,6 +1427,8 @@ export function AvatarViewer({
                 lipsyncCues={lipsyncCues}
                 audioEl={audioElement}
                 avatarRef={avatarRef}
+                morphOverrides={morphOverrides}
+                materialColorOverride={materialColorOverride}
               />
             </Suspense>
           </AvatarErrorBoundary>

@@ -31,6 +31,12 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <a
+              href="/create-avatar"
+              className="text-sm text-slate-400 hover:text-white transition-colors hidden sm:inline"
+            >
+              Create Avatar
+            </a>
+            <a
               href="/changelog"
               className="text-sm text-slate-400 hover:text-white transition-colors hidden sm:inline"
             >
@@ -419,6 +425,12 @@ export default function Home() {
                 className="text-slate-400 hover:text-white transition-colors"
               >
                 Use Cases
+              </a>
+              <a
+                href="/create-avatar"
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                Create Avatar
               </a>
               <a
                 href="/changelog"
