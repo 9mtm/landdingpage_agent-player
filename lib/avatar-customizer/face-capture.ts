@@ -8,13 +8,39 @@ let FaceLandmarker: any = null;
 let landmarkerInstance: any = null;
 let loadingPromise: Promise<void> | null = null;
 
-/** Dynamically import MediaPipe tasks-vision */
+/** Load MediaPipe from CDN at runtime only (avoids webpack bundling issues) */
+async function loadMediaPipeFromCDN(): Promise<any> {
+  // Check if already loaded
+  if ((window as any).MediaPipeVision) {
+    return (window as any).MediaPipeVision;
+  }
+
+  // Load from CDN via script tag
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.js';
+    script.onload = () => {
+      const vision = (window as any).vision || (window as any).MediaPipeVision;
+      (window as any).MediaPipeVision = vision;
+      resolve(vision);
+    };
+    script.onerror = () => reject(new Error('Failed to load MediaPipe from CDN'));
+    document.head.appendChild(script);
+  });
+}
+
+/** Dynamically load MediaPipe tasks-vision */
 async function ensureLoaded() {
   if (landmarkerInstance) return;
   if (loadingPromise) { await loadingPromise; return; }
 
   loadingPromise = (async () => {
-    const vision = await import('@mediapipe/tasks-vision');
+    const vision = await loadMediaPipeFromCDN();
+
+    if (!vision || !vision.FaceLandmarker) {
+      throw new Error('MediaPipe FaceLandmarker not available');
+    }
+
     FaceLandmarker = vision.FaceLandmarker;
     const filesetResolver = await vision.FilesetResolver.forVisionTasks(
       'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'

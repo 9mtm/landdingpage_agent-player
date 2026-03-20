@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import {
-  Github, Star, Book, Code2, Bell, Cloud, Sparkles, ArrowRight, Check,
+  Github, Star, Book, Code2, Bell, Cloud, Sparkles, ArrowRight, Check, Download,
   MessageCircle, Phone, Mail, Search, Users, Calendar, Server, BarChart3, Shield, MessagesSquare,
   Globe, MousePointer, Brain, Monitor, HardDrive, Volume2, Mic, Video, Key, Terminal, Puzzle,
   Upload, Link, UserCircle, Zap, Layout, ChevronRight
@@ -118,6 +118,13 @@ export default function Home() {
 
           {/* Links */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <a
+              href="/downloads"
+              className="px-8 py-4 rounded-xl bg-hero-gradient hover:opacity-90 transition-all flex items-center gap-2 font-semibold text-lg glow-purple"
+            >
+              <Download className="w-5 h-5" />
+              Download
+            </a>
             <a
               href="https://github.com/9mtm/Agent-Player"
               target="_blank"
